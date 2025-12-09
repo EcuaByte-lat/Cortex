@@ -11,8 +11,20 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "paths": {
+      "@cortex/core": ["./packages/core/src/index.ts"]
+    },
     "types": ["bun-types"]
   },
-  "include": ["packages/*/src/**/*"],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/mcp-server" },
+    { "path": "./packages/vscode-extension" }
+  ],
+  "include": [],
   "exclude": ["node_modules", "**/dist", "**/node_modules"]
 }

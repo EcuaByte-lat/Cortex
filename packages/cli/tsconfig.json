@@ -2,7 +2,14 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "composite": true,
+    "paths": {
+      "@cortex/core": ["../core/src/index.ts"]
+    }
   },
+  "references": [
+    { "path": "../core" }
+  ],
   "include": ["src/**/*"]
 }

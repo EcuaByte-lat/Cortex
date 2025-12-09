@@ -252,7 +252,7 @@ Fixes #123
 
 - [Project Documentation](./docs/)
 - [Architecture Overview](./docs/DEVELOPMENT.md)
-- [Vision & Roadmap](./docs/CORTEX_VISION.md)
+- [Architecture Decisions](./docs/architecture/decisions/)
 
 ## ❓ Questions?
 
