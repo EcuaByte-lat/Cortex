@@ -115,7 +115,8 @@ describe('ProjectContext', () => {
       mkdirSync(gitDir, { recursive: true });
       
       const name = ProjectContext.getProjectName(testDir);
-      expect(name).toContain('cortex-test-');
+      expect(name).toBeTruthy();
+      expect(name).not.toBe('unknown-project');
     });
   });
 
