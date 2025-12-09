@@ -7,9 +7,15 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: Test
+  # Single job with matrix for parallel execution
+  ci:
+    name: ${{ matrix.task }}
     runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: true  # Stop all jobs on first failure
+      matrix:
+        task: [build, test, typecheck, lint]
     
     steps:
       - name: Checkout code
@@ -20,61 +26,77 @@ jobs:
         with:
           bun-version: latest
       
-      - name: Install dependencies
-        run: bun install
-      
-      - name: Build packages (needed for typecheck)
-        run: bun run build
-      
-      - name: Run tests
-        run: bun test
-      
-      - name: Type check
-        run: bun run typecheck
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      # Cache Bun dependencies for faster runs
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          bun-version: latest
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
       
-      - name: Build all packages
+      # Build step (runs in parallel with other tasks)
+      - name: Build packages
+        if: matrix.task == 'build'
         run: bun run build
       
-      - name: Check build artifacts
+      - name: Verify build artifacts
+        if: matrix.task == 'build'
         run: |
           test -f packages/core/dist/index.js
           test -f packages/cli/dist/cli.js
           test -f packages/mcp-server/dist/mcp-server.js
           test -f packages/vscode-extension/dist/extension.js
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
       
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      # Upload build artifacts for potential reuse
+      - name: Upload build artifacts
+        if: matrix.task == 'build'
+        uses: actions/upload-artifact@v4
         with:
-          bun-version: latest
+          name: build-artifacts
+          path: |
+            packages/*/dist
+          retention-days: 1
       
-      - name: Install dependencies
-        run: bun install
+      # Test step (runs in parallel)
+      - name: Build for tests
+        if: matrix.task == 'test'
+        run: bun run build
       
-      - name: Check formatting
-        run: |
-          # Add prettier or other linters here when configured
-          echo "Linting passed"
+      - name: Run tests
+        if: matrix.task == 'test'
+        run: bun test
+      
+      # Typecheck step (runs in parallel)
+      - name: Type check
+        if: matrix.task == 'typecheck'
+        run: bun run typecheck
+      
+      # Lint step (runs in parallel, only on changed files in PRs)
+      - name: Get changed files
+        if: matrix.task == 'lint' && github.event_name == 'pull_request'
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.ts
+            **/*.js
+            **/*.json
+            **/*.md
+            **/*.yml
+            **/*.yaml
+      
+      - name: Check formatting (all files)
+        if: matrix.task == 'lint' && github.event_name != 'pull_request'
+        run: bunx prettier --check "**/*.{ts,js,json,md,yml,yaml}"
+        continue-on-error: true
+      
+      - name: Check formatting (changed files only)
+        if: matrix.task == 'lint' && github.event_name == 'pull_request' && steps.changed-files.outputs.any_changed == 'true'
+        run: bunx prettier --check ${{ steps.changed-files.outputs.all_changed_files }}
+        continue-on-error: true

@@ -7,49 +7,78 @@ on:
     branches: [main]
 
 jobs:
-  prettier:
-    name: Format Check
+  # Parallel quality checks with matrix
+  quality:
+    name: ${{ matrix.check }}
     runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false  # Continue other checks even if one fails
+      matrix:
+        check: [prettier, security]
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Needed for changed files detection
       
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
       
-      - name: Install dependencies
-        run: bun install
+      # Cache Bun dependencies
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-quality-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-quality-
+            ${{ runner.os }}-bun-
       
-      - name: Check formatting
-        run: |
-          bunx prettier --check "**/*.{ts,js,json,md,yml,yaml}"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      
+      # Prettier check - only on changed files for PRs
+      - name: Get changed files
+        if: matrix.check == 'prettier' && github.event_name == 'pull_request'
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.ts
+            **/*.js
+            **/*.json
+            **/*.md
+            **/*.yml
+            **/*.yaml
+      
+      - name: Check formatting (all files)
+        if: matrix.check == 'prettier' && github.event_name == 'push'
+        run: bunx prettier --check "**/*.{ts,js,json,md,yml,yaml}"
         continue-on-error: true
-
-  security:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
       
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - name: Check formatting (changed files only)
+        if: matrix.check == 'prettier' && github.event_name == 'pull_request' && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Checking formatting for changed files..."
+          bunx prettier --check ${{ steps.changed-files.outputs.all_changed_files }}
+        continue-on-error: true
       
-      - name: Install dependencies
-        run: bun install
-      
+      # Security audit
       - name: Run security audit
+        if: matrix.check == 'security'
         run: bun pm audit || true
-        
+  
+  # CodeQL runs separately only on main branch to save time
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       security-events: write
       actions: read
