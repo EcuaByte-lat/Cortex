@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'bun:test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ProjectContext } from '../context';
+import { clearProjectCache, getProjectId, getProjectName } from '../context';
 
 describe('ProjectContext', () => {
   let testDir: string;
@@ -11,13 +11,13 @@ describe('ProjectContext', () => {
     // Create a temporary test directory
     testDir = join(tmpdir(), `cortex-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    ProjectContext.clearCache();
+    clearProjectCache();
   });
 
   describe('getProjectId', () => {
     it('should return a consistent hash for the same directory', () => {
-      const id1 = ProjectContext.getProjectId(testDir);
-      const id2 = ProjectContext.getProjectId(testDir);
+      const id1 = getProjectId(testDir);
+      const id2 = getProjectId(testDir);
 
       expect(id1).toBe(id2);
       expect(id1).toHaveLength(16); // SHA-256 truncated to 16 chars
@@ -30,8 +30,8 @@ describe('ProjectContext', () => {
       mkdirSync(dir1, { recursive: true });
       mkdirSync(dir2, { recursive: true });
 
-      const id1 = ProjectContext.getProjectId(dir1);
-      const id2 = ProjectContext.getProjectId(dir2);
+      const id1 = getProjectId(dir1);
+      const id2 = getProjectId(dir2);
 
       expect(id1).not.toBe(id2);
     });
@@ -44,8 +44,8 @@ describe('ProjectContext', () => {
       mkdirSync(subDir, { recursive: true });
 
       // Both should return the same ID (git root)
-      const rootId = ProjectContext.getProjectId(testDir);
-      const subId = ProjectContext.getProjectId(subDir);
+      const rootId = getProjectId(testDir);
+      const subId = getProjectId(subDir);
 
       expect(rootId).toBe(subId);
     });
@@ -58,7 +58,7 @@ describe('ProjectContext', () => {
 
       writeFileSync(join(testDir, 'package.json'), JSON.stringify(packageJson));
 
-      const id = ProjectContext.getProjectId(testDir);
+      const id = getProjectId(testDir);
 
       expect(id).toBeTruthy();
       expect(id).toHaveLength(16);
@@ -75,8 +75,8 @@ describe('ProjectContext', () => {
       const subDir = join(testDir, 'deeply', 'nested', 'folder');
       mkdirSync(subDir, { recursive: true });
 
-      const rootId = ProjectContext.getProjectId(testDir);
-      const nestedId = ProjectContext.getProjectId(subDir);
+      const rootId = getProjectId(testDir);
+      const nestedId = getProjectId(subDir);
 
       expect(rootId).toBe(nestedId);
     });
@@ -91,12 +91,12 @@ describe('ProjectContext', () => {
 
       writeFileSync(join(testDir, 'package.json'), JSON.stringify(packageJson));
 
-      const name = ProjectContext.getProjectName(testDir);
+      const name = getProjectName(testDir);
       expect(name).toBe('my-awesome-project');
     });
 
     it('should return directory name when no package.json', () => {
-      const name = ProjectContext.getProjectName(testDir);
+      const name = getProjectName(testDir);
       expect(name).toBeTruthy();
       expect(name).not.toBe('unknown-project');
     });
@@ -105,7 +105,7 @@ describe('ProjectContext', () => {
       const gitDir = join(testDir, '.git');
       mkdirSync(gitDir, { recursive: true });
 
-      const name = ProjectContext.getProjectName(testDir);
+      const name = getProjectName(testDir);
       expect(name).toBeTruthy();
       expect(name).not.toBe('unknown-project');
     });
@@ -113,23 +113,23 @@ describe('ProjectContext', () => {
 
   describe('caching', () => {
     it('should cache project IDs', () => {
-      const id1 = ProjectContext.getProjectId(testDir);
+      const id1 = getProjectId(testDir);
 
       // Modify the directory (add a file)
       writeFileSync(join(testDir, 'test.txt'), 'test');
 
-      const id2 = ProjectContext.getProjectId(testDir);
+      const id2 = getProjectId(testDir);
 
       // Should return cached value
       expect(id1).toBe(id2);
     });
 
     it('should clear cache when requested', () => {
-      const id1 = ProjectContext.getProjectId(testDir);
+      const id1 = getProjectId(testDir);
 
-      ProjectContext.clearCache();
+      clearProjectCache();
 
-      const id2 = ProjectContext.getProjectId(testDir);
+      const id2 = getProjectId(testDir);
 
       // Should still be the same (deterministic)
       expect(id1).toBe(id2);

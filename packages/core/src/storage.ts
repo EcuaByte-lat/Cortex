@@ -1,7 +1,7 @@
 import { Database } from 'bun:sqlite';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { ProjectContext } from './context';
+import { getProjectId } from './context';
 
 /**
  * Represents a raw database row from SQLite.
@@ -125,7 +125,7 @@ export class MemoryStore {
 
     this.db = new Database(opts.dbPath || defaultPath);
     this.globalMode = opts.globalMode || false;
-    this.projectId = this.globalMode ? null : opts.projectId || ProjectContext.getProjectId();
+    this.projectId = this.globalMode ? null : opts.projectId || getProjectId();
 
     this.initialize();
   }

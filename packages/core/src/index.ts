@@ -7,7 +7,7 @@
  * @packageDocumentation
  * @example
  * ```typescript
- * import { MemoryStore, ProjectContext } from '@cortex/core';
+ * import { MemoryStore, getProjectId, getProjectName } from '@cortex/core';
  *
  * // Initialize store (auto-detects project)
  * const store = new MemoryStore();
@@ -24,10 +24,10 @@
  * const results = store.search('PostgreSQL');
  *
  * // Get project information
- * const projectId = ProjectContext.getProjectId();
- * const projectName = ProjectContext.getProjectName();
+ * const projectId = getProjectId();
+ * const projectName = getProjectName();
  * ```
  */
 
-export { ProjectContext } from './context';
+export { clearProjectCache, getProjectId, getProjectName } from './context';
 export { Memory, MemoryStore, MemoryStoreOptions } from './storage';
