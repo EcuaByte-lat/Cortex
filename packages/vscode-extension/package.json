@@ -23,7 +23,7 @@
   "devDependencies": {
     "@types/sql.js": "^1.4.9",
     "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^2.22.0"
+    "@vscode/vsce": "^3.7.1"
   },
   "dependencies": {
     "sql.js": "^1.13.0"
