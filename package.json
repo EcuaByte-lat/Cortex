@@ -1,0 +1,54 @@
+{
+  "name": "cortex-monorepo",
+  "version": "0.1.0",
+  "description": "Universal memory layer for AI coding tools via MCP",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "bun run build.ts",
+    "build:core": "bun --cwd packages/core run build",
+    "build:cli": "bun --cwd packages/cli run build",
+    "build:mcp": "bun --cwd packages/mcp-server run build",
+    "build:extension": "bun --cwd packages/vscode-extension run build",
+    "dev:cli": "bun --cwd packages/cli run dev",
+    "dev:mcp": "bun --cwd packages/mcp-server run dev",
+    "dev:extension": "bun --cwd packages/vscode-extension run dev",
+    "test": "bun test --recursive",
+    "test:core": "bun --cwd packages/core test",
+    "test:watch": "bun test --watch --recursive",
+    "test:coverage": "bun test --coverage --recursive",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "memory",
+    "context",
+    "claude",
+    "copilot",
+    "cursor",
+    "vscode-extension"
+  ],
+  "author": "Cortex Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AngelAlexQC/Cortex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AngelAlexQC/Cortex/issues"
+  },
+  "homepage": "https://github.com/AngelAlexQC/Cortex#readme",
+  "devDependencies": {
+    "@types/bun": "^1.1.13",
+    "@types/node": "^22.10.1",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.0"
+  }
+}

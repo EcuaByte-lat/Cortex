@@ -1,0 +1,62 @@
+name: Question
+description: Ask a question about Cortex usage or functionality
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        💡 **Tip:** Before asking, check if your question is answered in:
+        - [Documentation](https://github.com/AngelAlexQC/Cortex/tree/main/docs)
+        - [FAQ](https://github.com/AngelAlexQC/Cortex/blob/main/docs/troubleshooting/faq.md)
+        - [Existing Discussions](https://github.com/AngelAlexQC/Cortex/discussions)
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: "How do I..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What is your question about?
+      options:
+        - Installation & Setup
+        - CLI Usage
+        - MCP Integration
+        - VS Code Extension
+        - Project Isolation
+        - Performance
+        - Best Practices
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context about what you're trying to achieve
+      placeholder: "I'm trying to..."
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What I've Tried
+      description: What have you already tried to solve this?
+      placeholder: "I tried..."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have checked the documentation
+          required: true
+        - label: I have searched existing issues and discussions
+          required: true

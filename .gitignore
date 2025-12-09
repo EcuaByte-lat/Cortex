@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+bun.lockb
+bun.lock
+
+# Build outputs
+**/dist/
+*.js
+*.js.map
+!build.ts
+
+# VS Code Extension
+*.vsix
+
+# Database (datos locales del usuario)
+*.db
+*.db-*
+.cortex/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/settings.json
+.vscode-test/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo

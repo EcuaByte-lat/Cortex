@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="16" fill="#6366f1"/>
+  <g fill="#fff">
+    <!-- Brain icon -->
+    <path d="M64 24c-8.8 0-16 7.2-16 16 0 1.6.2 3.1.6 4.6-3.9 1.7-6.6 5.5-6.6 10 0 6 4.9 10.9 10.9 10.9 1.2 0 2.3-.2 3.4-.6 1.9 4.2 6.2 7.1 11.1 7.1s9.2-2.9 11.1-7.1c1.1.4 2.2.6 3.4.6 6 0 10.9-4.9 10.9-10.9 0-4.4-2.7-8.3-6.6-10 .4-1.5.6-3 .6-4.6 0-8.8-7.2-16-16-16z"/>
+    <circle cx="52" cy="52" r="3"/>
+    <circle cx="76" cy="52" r="3"/>
+    <!-- Neural connections -->
+    <line x1="32" y1="80" x2="48" y2="72" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="48" y1="72" x2="64" y2="80" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="64" y1="80" x2="80" y2="72" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="80" y1="72" x2="96" y2="80" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="32" cy="80" r="4" fill="#fff"/>
+    <circle cx="48" cy="72" r="4" fill="#fff"/>
+    <circle cx="64" cy="80" r="4" fill="#fff"/>
+    <circle cx="80" cy="72" r="4" fill="#fff"/>
+    <circle cx="96" cy="80" r="4" fill="#fff"/>
+    <!-- Memory layers -->
+    <rect x="28" y="92" width="72" height="6" rx="3" fill="#fff" opacity="0.8"/>
+    <rect x="32" y="102" width="64" height="6" rx="3" fill="#fff" opacity="0.6"/>
+    <rect x="36" y="112" width="56" height="6" rx="3" fill="#fff" opacity="0.4"/>
+  </g>
+</svg>

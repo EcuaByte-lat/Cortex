@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-extension",
+      "type": "shell",
+      "command": "bun",
+      "args": [
+        "run",
+        "build.ts"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/vscode-extension"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "watch-extension",
+      "type": "shell",
+      "command": "bun",
+      "args": [
+        "run",
+        "build.ts",
+        "--watch"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/vscode-extension"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "build-all",
+      "type": "shell",
+      "command": "bun",
+      "args": [
+        "run",
+        "build.ts"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "install-dependencies",
+      "type": "shell",
+      "command": "bun",
+      "args": [
+        "install"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

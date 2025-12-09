@@ -1,0 +1,24 @@
+{
+  "name": "@cortex/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server exposing Cortex memories to AI tools",
+  "type": "module",
+  "main": "./dist/mcp-server.js",
+  "scripts": {
+    "build": "bun build src/mcp-server.ts --outdir dist --target node --format esm",
+    "dev": "bun run --watch src/mcp-server.ts",
+    "start": "bun run dist/mcp-server.js",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "memory"
+  ],
+  "author": "Cortex Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cortex/core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  }
+}

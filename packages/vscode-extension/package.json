@@ -1,0 +1,119 @@
+{
+  "name": "cortex-vscode",
+  "version": "0.1.0",
+  "displayName": "Cortex Memory",
+  "description": "Visual memory management for AI coding tools",
+  "publisher": "cortex",
+  "main": "./dist/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AngelAlexQC/Cortex"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "AI",
+    "Visualization"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "devDependencies": {
+    "@types/sql.js": "^1.4.9",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "sql.js": "^1.13.0"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cortex-explorer",
+          "title": "Cortex Memory",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "cortex-explorer": [
+        {
+          "id": "cortex.memoryTree",
+          "name": "Memories"
+        },
+        {
+          "id": "cortex.statsView",
+          "name": "Statistics"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "cortex.addMemory",
+        "title": "Cortex: Add Memory",
+        "icon": "$(add)"
+      },
+      {
+        "command": "cortex.searchMemories",
+        "title": "Cortex: Search Memories",
+        "icon": "$(search)"
+      },
+      {
+        "command": "cortex.refreshTree",
+        "title": "Cortex: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cortex.deleteMemory",
+        "title": "Cortex: Delete Memory",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "cortex.viewMemory",
+        "title": "Cortex: View Memory Details",
+        "icon": "$(eye)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "cortex.addMemory",
+          "when": "view == cortex.memoryTree",
+          "group": "navigation"
+        },
+        {
+          "command": "cortex.searchMemories",
+          "when": "view == cortex.memoryTree",
+          "group": "navigation"
+        },
+        {
+          "command": "cortex.refreshTree",
+          "when": "view == cortex.memoryTree",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "cortex.viewMemory",
+          "when": "view == cortex.memoryTree && viewItem == memory",
+          "group": "inline"
+        },
+        {
+          "command": "cortex.deleteMemory",
+          "when": "view == cortex.memoryTree && viewItem == memory",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "dev": "bun run build.ts --watch",
+    "typecheck": "bunx tsc --noEmit",
+    "package": "vsce package",
+    "vscode:prepublish": "bun run build"
+  }
+}

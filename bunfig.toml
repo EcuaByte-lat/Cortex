@@ -1,0 +1,17 @@
+# Bun configuration for Cortex monorepo
+
+[install]
+# Use hoisted for monorepo compatibility
+linker = "hoisted"
+# Auto-install peer dependencies
+auto = "fallback"
+
+[run]
+# Use Bun runtime by default
+bun = true
+# Suppress unnecessary output
+silent = false
+
+[test]
+# Test configuration
+coverage = true

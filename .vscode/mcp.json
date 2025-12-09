@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "cortex": {
+      "type": "stdio",
+      "command": "bun",
+      "args": ["run", "C:\\Code\\Cortex\\packages\\mcp-server\\dist\\mcp-server.js"]
+    }
+  }
+}

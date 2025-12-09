@@ -1,0 +1,25 @@
+{
+  "name": "@cortex/cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for Cortex memory management",
+  "type": "module",
+  "bin": {
+    "cortex": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "bun build src/cli.ts --outdir dist --target node --format esm",
+    "dev": "bun run --watch src/cli.ts",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "keywords": [
+    "cli",
+    "memory",
+    "cortex"
+  ],
+  "author": "Cortex Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cortex/core": "workspace:*",
+    "commander": "^12.1.0"
+  }
+}
