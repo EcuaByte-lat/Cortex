@@ -20,6 +20,6 @@
   "license": "MIT",
   "dependencies": {
     "@cortex/core": "workspace:*",
-    "commander": "^12.1.0"
+    "commander": "^14.0.2"
   }
 }
