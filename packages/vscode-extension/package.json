@@ -1,6 +1,6 @@
 {
   "name": "cortex-vscode",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Cortex Memory",
   "description": "Visual memory management for AI coding tools",
   "publisher": "EcuaByte",

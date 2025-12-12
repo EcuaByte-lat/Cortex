@@ -46,10 +46,21 @@ jobs:
       - name: Run tests
         run: bun test
 
-      - name: Package VS Code Extension
+      - name: Prepare and Package VS Code Extension
         run: |
-          cd packages/vscode-extension
-          bun x vsce package
+          mkdir -p /tmp/cortex-publish
+          cp -r packages/vscode-extension/dist /tmp/cortex-publish/
+          cp packages/vscode-extension/package.json /tmp/cortex-publish/
+          cp -r packages/vscode-extension/resources /tmp/cortex-publish/
+          cp LICENSE /tmp/cortex-publish/
+          
+          cd /tmp/cortex-publish
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" package.json
+          sed -i 's/"vscode:prepublish": "bun run build"/"vscode:prepublish": "echo ok"/' package.json
+          
+          npx @vscode/vsce package --no-dependencies
+          cp *.vsix $GITHUB_WORKSPACE/packages/vscode-extension/
 
       - name: Extract version from tag
         id: get_version
@@ -82,8 +93,8 @@ jobs:
       - name: Publish to VS Code Marketplace
         if: success()
         run: |
-          cd packages/vscode-extension
-          bun x vsce publish -p ${{ secrets.VSCE_TOKEN }}
+          cd /tmp/cortex-publish
+          npx @vscode/vsce publish --no-dependencies -p ${{ secrets.VSCE_PAT }}
         continue-on-error: true
 
       - name: Publish to Open VSX
