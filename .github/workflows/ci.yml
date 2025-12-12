@@ -81,7 +81,7 @@ jobs:
       - name: Get changed files
         if: matrix.task == 'lint' && github.event_name == 'pull_request'
         id: changed-files
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v47
         with:
           files: |
             **/*.ts
