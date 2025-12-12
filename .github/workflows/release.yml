@@ -57,9 +57,14 @@ jobs:
           
           cd /tmp/cortex-publish
           VERSION="${GITHUB_REF#refs/tags/v}"
-          sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" package.json
-          sed -i 's/"vscode:prepublish": "bun run build"/"vscode:prepublish": "echo ok"/' package.json
+          # Use jq to update version safely
+          if [ -n "$VERSION" ] && [ "$VERSION" != "$GITHUB_REF" ]; then
+            jq --arg v "$VERSION" '.version = $v' package.json > tmp.json && mv tmp.json package.json
+          fi
+          # Update prepublish script
+          jq '.scripts["vscode:prepublish"] = "echo ok"' package.json > tmp.json && mv tmp.json package.json
           
+          cat package.json
           npx @vscode/vsce package --no-dependencies
           cp *.vsix $GITHUB_WORKSPACE/packages/vscode-extension/
 
