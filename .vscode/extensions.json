@@ -4,6 +4,7 @@
     "oven.bun-vscode",
     "editorconfig.editorconfig",
     "github.vscode-github-actions",
-    "github.vscode-pull-request-github"
+    "github.vscode-pull-request-github",
+    "ecuabyte.cortex-vscode"
   ]
 }
