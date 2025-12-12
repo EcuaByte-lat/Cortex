@@ -11,3 +11,6 @@
 
 ## Architecture
 - [Architecture Decision Records](./architecture/decisions/)
+
+## Branding
+- [Brand Assets](./branding/) - Logos, icons, and brand guidelines

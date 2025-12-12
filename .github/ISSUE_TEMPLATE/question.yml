@@ -7,9 +7,9 @@ body:
     attributes:
       value: |
         💡 **Tip:** Before asking, check if your question is answered in:
-        - [Documentation](https://github.com/AngelAlexQC/Cortex/tree/main/docs)
-        - [FAQ](https://github.com/AngelAlexQC/Cortex/blob/main/docs/troubleshooting/faq.md)
-        - [Existing Discussions](https://github.com/AngelAlexQC/Cortex/discussions)
+        - [Documentation](https://github.com/EcuaByte-lat/Cortex/tree/main/docs)
+        - [FAQ](https://github.com/EcuaByte-lat/Cortex/blob/main/docs/troubleshooting/faq.md)
+        - [Existing Discussions](https://github.com/EcuaByte-lat/Cortex/discussions)
 
   - type: textarea
     id: question

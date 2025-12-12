@@ -15,7 +15,7 @@ Cortex is a **persistent memory system for AI coding assistants**. It solves the
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/AngelAlexQC/Cortex.git
+git clone https://github.com/EcuaByte-lat/Cortex.git
 cd Cortex
 bun install
 
@@ -197,4 +197,4 @@ See [Examples](./examples.md) for more real-world use cases.
 
 ---
 
-**Having issues?** Check [Common Issues](../troubleshooting/common-issues.md) or [open an issue](https://github.com/AngelAlexQC/Cortex/issues).
+**Having issues?** Check [Common Issues](../troubleshooting/common-issues.md) or [open an issue](https://github.com/EcuaByte-lat/Cortex/issues).

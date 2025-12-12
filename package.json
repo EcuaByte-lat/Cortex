@@ -47,12 +47,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AngelAlexQC/Cortex.git"
+    "url": "https://github.com/EcuaByte-lat/Cortex.git"
   },
   "bugs": {
-    "url": "https://github.com/AngelAlexQC/Cortex/issues"
+    "url": "https://github.com/EcuaByte-lat/Cortex/issues"
   },
-  "homepage": "https://github.com/AngelAlexQC/Cortex#readme",
+  "homepage": "https://github.com/EcuaByte-lat/Cortex#readme",
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
     "@types/bun": "^1.1.13",

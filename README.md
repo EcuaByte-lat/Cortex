@@ -1,11 +1,21 @@
 # 🧠 Cortex
 
-[![CI](https://github.com/AngelAlexQC/Cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/AngelAlexQC/Cortex/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Bun](https://img.shields.io/badge/Bun-1.0+-black?logo=bun)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
+<p align="center">
+  <img src="docs/branding/png/icon-512.png" alt="Cortex Logo" width="128" height="128">
+</p>
 
-> **Persistent memory for AI coding assistants**
+<p align="center">
+  <strong>Persistent memory for AI coding assistants</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/EcuaByte-lat/Cortex/actions/workflows/ci.yml"><img src="https://github.com/EcuaByte-lat/Cortex/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://bun.sh"><img src="https://img.shields.io/badge/Bun-1.0+-black?logo=bun" alt="Bun"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript" alt="TypeScript"></a>
+</p>
+
+---
 
 Stop repeating yourself to AI tools. Cortex remembers your project context across all sessions and tools.
 
@@ -112,7 +122,7 @@ Restart Claude Desktop.
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ```bash
-git clone https://github.com/AngelAlexQC/Cortex.git
+git clone https://github.com/EcuaByte-lat/Cortex.git
 cd Cortex
 bun install && bun run build && bun test
 ```
@@ -123,4 +133,6 @@ MIT License - See [LICENSE](./LICENSE)
 
 ---
 
-**Built with ❤️ by [@AngelAlexQC](https://github.com/AngelAlexQC)**
+<p align="center">
+  <strong>Built with ❤️ by <a href="https://github.com/EcuaByte-lat">EcuaByte</a></strong>
+</p>

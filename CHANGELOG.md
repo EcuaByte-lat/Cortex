@@ -30,5 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project-based memory isolation
 - Basic documentation structure
 
-[Unreleased]: https://github.com/AngelAlexQC/Cortex/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/AngelAlexQC/Cortex/releases/tag/v0.1.0
+[Unreleased]: https://github.com/EcuaByte-lat/Cortex/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/EcuaByte-lat/Cortex/releases/tag/v0.1.0

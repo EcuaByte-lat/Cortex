@@ -19,7 +19,7 @@ We take security seriously. If you discover a security vulnerability in Cortex, 
 Instead, please report security issues via:
 
 1. **Email:** security@cortex-project.dev (preferred)
-2. **GitHub Security Advisory:** [Create a private security advisory](https://github.com/AngelAlexQC/Cortex/security/advisories/new)
+2. **GitHub Security Advisory:** [Create a private security advisory](https://github.com/EcuaByte-lat/Cortex/security/advisories/new)
 
 ### What to Include
 
@@ -131,7 +131,7 @@ webviewPanel.webview.html = escapeHtml(memory.content);
 ## Security Updates & Advisories
 
 Security advisories are published at:
-- [GitHub Security Advisories](https://github.com/AngelAlexQC/Cortex/security/advisories)
+- [GitHub Security Advisories](https://github.com/EcuaByte-lat/Cortex/security/advisories)
 - [CHANGELOG.md](./CHANGELOG.md) (for released patches)
 
 ## Vulnerability Disclosure Policy
@@ -162,7 +162,7 @@ We'll recognize security researchers who responsibly disclose vulnerabilities:
 ## Questions?
 
 For security-related questions that are not vulnerabilities:
-- Open a [GitHub Discussion](https://github.com/AngelAlexQC/Cortex/discussions)
+- Open a [GitHub Discussion](https://github.com/EcuaByte-lat/Cortex/discussions)
 - Email: security@cortex-project.dev
 
 ---

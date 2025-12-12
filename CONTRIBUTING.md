@@ -10,7 +10,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ### Reporting Bugs
 
-Before creating bug reports, please check the [issue tracker](https://github.com/AngelAlexQC/Cortex/issues) to avoid duplicates.
+Before creating bug reports, please check the [issue tracker](https://github.com/EcuaByte-lat/Cortex/issues) to avoid duplicates.
 
 When reporting bugs, include:
 - **Clear description** of the issue
@@ -257,7 +257,7 @@ Fixes #123
 ## ❓ Questions?
 
 Feel free to:
-- Open a [discussion](https://github.com/AngelAlexQC/Cortex/discussions)
+- Open a [discussion](https://github.com/EcuaByte-lat/Cortex/discussions)
 - Ask in an existing issue
 - Reach out to maintainers
 

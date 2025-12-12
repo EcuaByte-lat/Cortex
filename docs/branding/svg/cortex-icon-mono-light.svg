@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monochrome version - for dark backgrounds -->
+  <g fill="white">
+    <!-- Central hub -->
+    <circle cx="256" cy="256" r="60"/>
+    
+    <!-- Four main nodes -->
+    <circle cx="256" cy="120" r="40"/>
+    <circle cx="392" cy="256" r="40"/>
+    <circle cx="256" cy="392" r="40"/>
+    <circle cx="120" cy="256" r="40"/>
+    
+    <!-- Connections -->
+    <rect x="248" y="160" width="16" height="36" rx="8"/>
+    <rect x="352" y="248" width="36" height="16" rx="8"/>
+    <rect x="248" y="316" width="16" height="36" rx="8"/>
+    <rect x="124" y="248" width="36" height="16" rx="8"/>
+    
+    <!-- Inner core (knockout) -->
+    <circle cx="256" cy="256" r="25" fill="#0F0F23"/>
+    <circle cx="256" cy="256" r="12" fill="white"/>
+  </g>
+</svg>

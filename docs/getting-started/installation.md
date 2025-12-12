@@ -33,7 +33,7 @@ bun --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/AngelAlexQC/Cortex.git
+git clone https://github.com/EcuaByte-lat/Cortex.git
 cd Cortex
 
 # Install dependencies
@@ -59,7 +59,7 @@ If you only need the MCP server for AI tool integration:
 
 ```bash
 # Clone and build
-git clone https://github.com/AngelAlexQC/Cortex.git
+git clone https://github.com/EcuaByte-lat/Cortex.git
 cd Cortex
 bun install
 bun run build:mcp
@@ -186,4 +186,4 @@ bun remove -g @cortex/cli
 
 ---
 
-**Questions?** Check the [FAQ](../troubleshooting/faq.md) or [open an issue](https://github.com/AngelAlexQC/Cortex/issues).
+**Questions?** Check the [FAQ](../troubleshooting/faq.md) or [open an issue](https://github.com/EcuaByte-lat/Cortex/issues).
