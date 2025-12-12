@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "displayName": "Cortex Memory",
   "description": "Visual memory management for AI coding tools",
-  "publisher": "cortex",
+  "publisher": "EcuaByte",
   "main": "./dist/extension.js",
   "repository": {
     "type": "git",
