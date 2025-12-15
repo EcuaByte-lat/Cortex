@@ -55,6 +55,29 @@
     "sql.js": "^1.13.0"
   },
   "contributes": {
+    "taskDefinitions": [
+      {
+        "type": "cortex",
+        "required": [
+          "tool",
+          "command"
+        ],
+        "properties": {
+          "tool": {
+            "type": "string",
+            "description": "The tool/script name"
+          },
+          "category": {
+            "type": "string",
+            "description": "Tool category (npm, make, docker, script)"
+          },
+          "command": {
+            "type": "string",
+            "description": "The command to execute"
+          }
+        }
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -71,8 +94,8 @@
           "name": "Memories"
         },
         {
-          "id": "cortex.statsView",
-          "name": "Statistics"
+          "id": "cortex.toolsTree",
+          "name": "Project Tools"
         }
       ]
     },
@@ -101,6 +124,16 @@
         "command": "cortex.viewMemory",
         "title": "Cortex: View Memory Details",
         "icon": "$(eye)"
+      },
+      {
+        "command": "cortex.runTool",
+        "title": "Cortex: Run Tool",
+        "icon": "$(play)"
+      },
+      {
+        "command": "cortex.refreshTools",
+        "title": "Cortex: Refresh Tools",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
@@ -119,6 +152,11 @@
           "command": "cortex.refreshTree",
           "when": "view == cortex.memoryTree",
           "group": "navigation"
+        },
+        {
+          "command": "cortex.refreshTools",
+          "when": "view == cortex.toolsTree",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -130,6 +168,11 @@
         {
           "command": "cortex.deleteMemory",
           "when": "view == cortex.memoryTree && viewItem == memory",
+          "group": "inline"
+        },
+        {
+          "command": "cortex.runTool",
+          "when": "view == cortex.toolsTree && viewItem == tool",
           "group": "inline"
         }
       ]

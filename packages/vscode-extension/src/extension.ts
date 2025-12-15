@@ -1,7 +1,12 @@
 import * as vscode from 'vscode';
+
 import { MemoryTreeProvider } from './memoryTreeProvider';
 import { MemoryWebviewProvider } from './memoryWebviewProvider';
+import type { Memory } from './storage';
 import { MemoryStore } from './storage';
+import { CortexTaskProvider } from './taskProvider';
+import type { Tool } from './toolScanner';
+import { ToolTreeProvider } from './toolTreeProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Cortex Memory extension is now active');
@@ -9,9 +14,18 @@ export function activate(context: vscode.ExtensionContext) {
   // Initialize memory store
   const store = new MemoryStore();
 
-  // Register tree view provider
+  // Register tree view providers
   const treeProvider = new MemoryTreeProvider(store);
   vscode.window.registerTreeDataProvider('cortex.memoryTree', treeProvider);
+
+  const toolTreeProvider = new ToolTreeProvider();
+  vscode.window.registerTreeDataProvider('cortex.toolsTree', toolTreeProvider);
+
+  // Register task provider for native VS Code task integration
+  const taskProvider = new CortexTaskProvider();
+  context.subscriptions.push(
+    vscode.tasks.registerTaskProvider(CortexTaskProvider.type, taskProvider)
+  );
 
   // Register webview provider
   const webviewProvider = new MemoryWebviewProvider(context.extensionUri, store);
@@ -126,6 +140,33 @@ export function activate(context: vscode.ExtensionContext) {
       if (item?.memory) {
         webviewProvider.showMemory(item.memory);
       }
+    })
+  );
+
+  // Tool commands - execute via VS Code task system
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cortex.runTool', async (tool: Tool) => {
+      if (!tool?.command) return;
+
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      if (!workspaceFolder) return;
+
+      // Create and execute task using VS Code's native task system
+      const task = new vscode.Task(
+        { type: 'cortex', tool: tool.name, category: tool.category, command: tool.command },
+        workspaceFolder,
+        `${tool.category}: ${tool.name}`,
+        'Cortex',
+        new vscode.ShellExecution(tool.command)
+      );
+
+      await vscode.tasks.executeTask(task);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cortex.refreshTools', () => {
+      toolTreeProvider.refresh();
     })
   );
 }
