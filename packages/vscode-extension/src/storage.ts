@@ -34,9 +34,11 @@ export class MemoryStore {
 
   private async initialize() {
     // Get the path to sql-wasm.wasm file
+    // require.resolve('sql.js') returns: .../node_modules/sql.js/dist/sql-wasm.js
+    // So we go up one level (..) to get to dist/ where sql-wasm.wasm lives
     const require = createRequire(import.meta.url);
     const sqlJsPath = require.resolve('sql.js');
-    const wasmBuffer = readFileSync(join(sqlJsPath, '..', 'dist', 'sql-wasm.wasm'));
+    const wasmBuffer = readFileSync(join(sqlJsPath, '..', 'sql-wasm.wasm'));
     // Convert Buffer to ArrayBuffer
     const wasmBinary = wasmBuffer.buffer.slice(
       wasmBuffer.byteOffset,
