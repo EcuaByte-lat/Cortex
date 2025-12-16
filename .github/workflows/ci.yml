@@ -56,7 +56,7 @@ jobs:
       # Upload build artifacts for potential reuse
       - name: Upload build artifacts
         if: matrix.task == 'build'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-artifacts
           path: |
