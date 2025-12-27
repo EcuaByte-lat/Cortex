@@ -400,7 +400,7 @@ export class MemoryStore {
     }
 
     const fields: string[] = [];
-    const params: (number | string)[] = [];
+    const params: (number | string | null)[] = [];
 
     if (updates.content !== undefined) {
       fields.push('content = ?');
