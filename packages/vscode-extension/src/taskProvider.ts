@@ -111,7 +111,7 @@ export class CortexTaskProvider implements vscode.TaskProvider {
     return task;
   }
 
-  private getTaskGroup(name: string, category: string): vscode.TaskGroup | undefined {
+  private getTaskGroup(name: string, _category: string): vscode.TaskGroup | undefined {
     const lowerName = name.toLowerCase();
 
     // Build tasks
