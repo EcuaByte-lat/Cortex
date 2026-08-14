@@ -159,13 +159,13 @@ export class OllamaModelAdapter implements ModelAdapter {
 
       clearTimeout(timeout);
 
-      if (!response || !response.ok) {
+      if (!response?.ok) {
         // Alternatively try a GET if HEAD fails
         const resp2 = await fetch(`${configuredUrl.replace(/\/$/, '')}/api/tags`, {
           method: 'GET',
           signal: AbortSignal.timeout(1000),
         }).catch(() => null);
-        if (!resp2 || !resp2.ok) return null;
+        if (!resp2?.ok) return null;
       }
 
       return new OllamaModelAdapter(modelId || configuredModel, configuredUrl);

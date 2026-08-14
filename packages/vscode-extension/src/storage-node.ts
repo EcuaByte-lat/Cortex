@@ -184,8 +184,9 @@ export class MemoryStore implements IMemoryStore {
   async get(id: number): Promise<Memory | null> {
     await this.ensureInitialized();
     const res = this.db?.exec('SELECT * FROM memories WHERE id = ?', [id]);
-    if (!res || !res.length) return null;
-    return this.rowToMemory(res[0].columns, res[0].values[0]);
+    const result = res?.[0];
+    if (!result) return null;
+    return this.rowToMemory(result.columns, result.values[0]);
   }
 
   async search(query: string, options?: { type?: string; limit?: number }) {
@@ -202,8 +203,9 @@ export class MemoryStore implements IMemoryStore {
       params.push(options.limit);
     }
     const res = this.db?.exec(sql, params);
-    if (!res || !res.length) return [];
-    return res[0].values.map((row) => this.rowToMemory(res[0].columns, row));
+    const result = res?.[0];
+    if (!result) return [];
+    return result.values.map((row) => this.rowToMemory(result.columns, row));
   }
 
   async list(options?: { type?: string; limit?: number }) {
@@ -220,8 +222,9 @@ export class MemoryStore implements IMemoryStore {
       params.push(options.limit);
     }
     const res = this.db?.exec(sql, params);
-    if (!res || !res.length) return [];
-    return res[0].values.map((row) => this.rowToMemory(res[0].columns, row));
+    const result = res?.[0];
+    if (!result) return [];
+    return result.values.map((row) => this.rowToMemory(result.columns, row));
   }
 
   async update(id: number, memory: Record<string, unknown>) {

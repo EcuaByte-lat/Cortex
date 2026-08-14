@@ -50,7 +50,12 @@ describe('Embeddings', () => {
 
       expect(deserialized.length).toBe(embedding.length);
       for (let i = 0; i < embedding.length; i++) {
-        expect(deserialized[i]).toBeCloseTo(embedding[i]!);
+        const expected = embedding[i];
+        const actual = deserialized[i];
+        if (expected === undefined || actual === undefined) {
+          throw new Error('Embedding round-trip changed vector length');
+        }
+        expect(actual).toBeCloseTo(expected);
       }
     });
 

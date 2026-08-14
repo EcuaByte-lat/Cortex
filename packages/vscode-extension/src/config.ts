@@ -11,48 +11,48 @@ export enum AIProvider {
   Ollama = 'ollama',
 }
 
-export class CortexConfig {
-  static get config() {
+export const CortexConfig = {
+  get config() {
     return vscode.workspace.getConfiguration('cortex');
-  }
+  },
 
   /**
    * Get the configured AI Provider
    */
-  static get provider(): AIProvider {
+  get provider(): AIProvider {
     return CortexConfig.config.get<AIProvider>('provider') || AIProvider.Auto;
-  }
+  },
 
   /**
    * Get custom model override if set
    */
-  static get customModel(): string {
+  get customModel(): string {
     return CortexConfig.config.get<string>('model.custom') || '';
-  }
+  },
 
   /**
    * Get API Key for a provider (checks settings first, then secrets)
    * Note: Secrets must be retrieved asynchronously via SecretStorage
    */
-  static getApiKey(provider: AIProvider): string {
+  getApiKey(provider: AIProvider): string {
     // Only returns the declarative setting. Secrets are handled by the caller or specialized method.
     return CortexConfig.config.get<string>(`${provider}.apiKey`) || '';
-  }
+  },
 
   /**
    * Get Model ID for a provider
    */
-  static getModel(provider: AIProvider): string {
+  getModel(provider: AIProvider): string {
     const custom = CortexConfig.customModel;
     if (custom) return custom;
 
     return CortexConfig.config.get<string>(`${provider}.model`) || '';
-  }
+  },
 
   /**
    * Analysis Settings
    */
-  static get scan() {
+  get scan() {
     return {
       sequential: CortexConfig.config.get<boolean>('scan.sequential') ?? true,
       delayMs: CortexConfig.config.get<number>('scan.delayMs') || 1000,
@@ -66,24 +66,24 @@ export class CortexConfig {
         '**/.git/**',
       ],
     };
-  }
+  },
 
   /**
    * Proactive Settings
    */
-  static get proactive() {
+  get proactive() {
     return {
       enabled: CortexConfig.config.get<boolean>('proactiveCapture.enabled') ?? true,
       autoScan: CortexConfig.config.get<boolean>('autoScanOnStartup') ?? true,
     };
-  }
+  },
 
   /**
    * Determine best provider if 'auto' is selected
    * Logic: Claude > OpenAI > Gemini > Ollama
    * (Simulated logic, caller needs to verify keys)
    */
-  static get autoProviderOrder(): AIProvider[] {
+  get autoProviderOrder(): AIProvider[] {
     return [
       AIProvider.Anthropic,
       AIProvider.OpenAI,
@@ -92,5 +92,5 @@ export class CortexConfig {
       AIProvider.Mistral,
       AIProvider.Ollama,
     ];
-  }
-}
+  },
+};

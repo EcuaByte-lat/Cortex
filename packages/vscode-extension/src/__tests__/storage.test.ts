@@ -12,12 +12,18 @@ import type { MemoryStore } from '../storage';
 // Mock vscode module BEFORE importing storage
 mock.module('vscode', () => ({
   EventEmitter: class {
-    fire() {}
-    event = () => {};
-    dispose() {}
+    fire() {
+      // Mock event emitter.
+    }
+    event = () => {
+      // Mock event subscription.
+    };
+    dispose() {
+      // Mock disposal.
+    }
   },
   window: {
-    showErrorMessage: () => {},
+    showErrorMessage: () => undefined,
   },
 }));
 

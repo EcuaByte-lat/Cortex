@@ -66,7 +66,9 @@ export class DeepSeekModelAdapter implements ModelAdapter {
             const json = JSON.parse(line.substring(6));
             const content = json.choices[0]?.delta?.content;
             if (content) yield content;
-          } catch {}
+          } catch {
+            // Ignore malformed stream chunks.
+          }
         }
       }
     }
