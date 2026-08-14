@@ -50,7 +50,7 @@ and its service principal instead, then configure a federated credential for
 this GitHub Actions subject:
 
 - Issuer: `https://token.actions.githubusercontent.com/`
-- Subject: `repo:EcuaByte-lat/Cortex:ref:refs/heads/main`
+- Subject: `repo:EcuaByte-lat@249192926/Cortex@1110735823:ref:refs/heads/main`
 - Audience: `api://AzureADTokenExchange`
 
 Authorize the app's service principal in the `EcuaByte` Visual Studio
