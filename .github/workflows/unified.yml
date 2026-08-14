@@ -227,8 +227,20 @@ jobs:
           if [[ "$EXTENSION_VERSION" != "$OVSX_VERSION" ]]; then
             echo "📦 Publishing to Open VSX..."
             cd packages/vscode-extension
-            bunx ovsx publish --no-dependencies -p $OVSX_PAT
-            echo "✅ Published to Open VSX successfully"
+            set +e
+            PUBLISH_OUTPUT=$(bunx ovsx publish --no-dependencies -p "$OVSX_PAT" 2>&1)
+            PUBLISH_STATUS=$?
+            set -e
+            echo "$PUBLISH_OUTPUT"
+
+            if [[ "$PUBLISH_STATUS" -eq 0 ]]; then
+              echo "✅ Published to Open VSX successfully"
+            elif [[ "$PUBLISH_OUTPUT" == *"already published"* || "$PUBLISH_OUTPUT" == *"already exists"* ]]; then
+              echo "ℹ️ Open VSX already recorded $EXTENSION_VERSION, continuing."
+            else
+              echo "❌ Open VSX publishing failed."
+              exit "$PUBLISH_STATUS"
+            fi
           else
              echo "ℹ️ Open VSX already has $EXTENSION_VERSION, skipping."
           fi
