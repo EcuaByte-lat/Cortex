@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-mcp-server",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "MCP server exposing Cortex engineering state and handoffs to coding agents",
   "type": "module",
   "bin": {
