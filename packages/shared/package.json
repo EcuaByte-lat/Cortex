@@ -7,5 +7,10 @@
   "scripts": {
     "typecheck": "bunx tsc --noEmit",
     "build": "bunx tsc --declaration --emitDeclarationOnly --outDir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EcuaByte-lat/Cortex.git",
+    "directory": "packages/shared"
   }
 }
