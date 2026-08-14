@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-cli",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Command-line interface for Cortex memory management",
   "type": "module",
   "bin": {

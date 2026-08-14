@@ -1,6 +1,6 @@
 {
   "name": "cortex-vscode",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "displayName": "Cortex: AI Memory",
   "description": "Evidence-backed engineering state and task handoffs for coding agents. Works with Copilot, Claude, and more.",
   "publisher": "EcuaByte",

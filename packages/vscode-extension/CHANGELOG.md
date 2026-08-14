@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.3
+
+### Patch Changes
+
+- [`ddd823d`](https://github.com/EcuaByte-lat/Cortex/commit/ddd823dd03c6aa7ea9ebe139065242f9d5bb5216) Thanks [@aquirozdev](https://github.com/aquirozdev)! - Fix: Implement strict project isolation for memories in VS Code extension (UI now matches MCP Agent view).
+
 ## 0.8.2
 
 ## 0.8.1

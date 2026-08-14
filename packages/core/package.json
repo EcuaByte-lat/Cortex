@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-core",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Core memory storage and types for Cortex",
   "type": "module",
   "main": "./dist/index.js",
