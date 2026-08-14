@@ -17,6 +17,7 @@ import type {
   RepositoryContext,
 } from '@ecuabyte/cortex-shared';
 import initSqlJs, { type Database, type SqlValue } from 'sql.js';
+import { type CodexRolloutCache, readCodexRollouts } from './codexRollout';
 import {
   buildContinuityDashboardSnapshot,
   type ContinuityDashboardInput,
@@ -207,26 +208,34 @@ function createSqlAdapter(db: Database): ContinuityQueryAdapter {
 export interface ContinuityMonitorOptions {
   dbPath?: string;
   eventJournalPath?: string;
+  codexSessionsPath?: string;
   extensionPath?: string;
 }
 
 export class ContinuityMonitor {
   private readonly dbPath: string;
   private readonly eventJournalPath: string;
+  private readonly codexSessionsPath: string;
   private readonly extensionPath?: string;
   private sqlPromise: Promise<ReturnType<typeof initSqlJs>> | undefined;
+  private readonly codexCache: CodexRolloutCache = new Map();
   private lastModified = 0;
 
   constructor(options: ContinuityMonitorOptions = {}) {
     this.dbPath = options.dbPath ?? join(homedir(), '.cortex', 'continuity.db');
     this.eventJournalPath =
       options.eventJournalPath ?? join(dirname(this.dbPath), 'continuity.events.ndjson');
+    this.codexSessionsPath = options.codexSessionsPath ?? join(homedir(), '.codex', 'sessions');
     this.extensionPath = options.extensionPath;
   }
 
   async read(workspace: ContinuityDashboardWorkspace): Promise<ContinuityDashboardSnapshot> {
     const generatedAt = new Date().toISOString();
-    if (!existsSync(this.dbPath) && !existsSync(this.eventJournalPath)) {
+    if (
+      !existsSync(this.dbPath) &&
+      !existsSync(this.eventJournalPath) &&
+      !existsSync(this.codexSessionsPath)
+    ) {
       return buildContinuityDashboardSnapshot({
         workspace,
         tasks: [],
@@ -256,10 +265,17 @@ export class ContinuityMonitor {
       const journalEvents = existsSync(this.eventJournalPath)
         ? parseContinuityEventJournal(readFileSync(this.eventJournalPath, 'utf8'))
         : [];
+      const rolloutInput = readCodexRollouts(this.codexSessionsPath, workspace, this.codexCache);
       const eventKeys = new Set(
         input.events.map((event) => `${event.eventId}:${event.type}:${event.sessionId}`)
       );
       input.events = [
+        ...rolloutInput.events.filter((event) => {
+          const key = `${event.eventId}:${event.type}:${event.sessionId}`;
+          if (eventKeys.has(key)) return false;
+          eventKeys.add(key);
+          return true;
+        }),
         ...journalEvents.filter((event) => {
           const key = `${event.eventId}:${event.type}:${event.sessionId}`;
           if (eventKeys.has(key)) return false;
@@ -268,6 +284,9 @@ export class ContinuityMonitor {
         }),
         ...input.events,
       ];
+      input.tasks = [...input.tasks, ...rolloutInput.tasks];
+      input.attempts = [...input.attempts, ...rolloutInput.attempts];
+      input.evidence = [...input.evidence, ...rolloutInput.evidence];
       this.lastModified = Math.max(
         existsSync(this.dbPath) ? statSync(this.dbPath).mtimeMs : 0,
         existsSync(this.eventJournalPath) ? statSync(this.eventJournalPath).mtimeMs : 0

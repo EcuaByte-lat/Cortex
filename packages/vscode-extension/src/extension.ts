@@ -226,6 +226,15 @@ export async function activate(context: vscode.ExtensionContext) {
       dashboardWebview.setContinuitySnapshot(snapshot);
     };
 
+    context.subscriptions.push(
+      vscode.window.registerWebviewPanelSerializer('cortexAIScan', {
+        async deserializeWebviewPanel(panel) {
+          dashboardWebview.attach(panel, context);
+          await refreshContinuity();
+        },
+      })
+    );
+
     // --- Connect Components (Iron Man Wiring) ---
     observer.setWebview(dashboardWebview);
 
