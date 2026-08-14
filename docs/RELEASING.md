@@ -40,7 +40,8 @@ published from this public repository.
    the generated `.vsix` attached, unless that release already exists.
 
 The VS Code extension is intentionally not published to npm. Its distribution
-channels are VS Code Marketplace, Open VSX, and GitHub Releases. Marketplace publication uses a
+channels are VS Code Marketplace, Open VSX, and GitHub Releases. Marketplace
+publication uses a
 GitHub Actions `VSCE_PAT` secret with the minimum Azure DevOps scope
 `Marketplace (Manage)`.
 
