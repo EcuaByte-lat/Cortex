@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload build artifacts
         if: matrix.task == 'build'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-artifacts
           path: packages/*/dist
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: matrix.task == 'test'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: reports/coverage
@@ -109,7 +109,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.task == 'test'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: ./reports/coverage/lcov.info
           fail_ci_if_error: false
@@ -144,7 +144,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -154,7 +154,7 @@ jobs:
           bun-version: latest
 
       - name: Setup Node.js (for npm publish)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
@@ -231,7 +231,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -253,7 +253,7 @@ jobs:
     steps:
       - name: Trigger Parent Sync
         if: ${{ vars.PARENT_REPOSITORY != '' }}
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.GH_TOKEN || secrets.SUBMODULE_PAT }}
           repository: ${{ vars.PARENT_REPOSITORY }}
