@@ -13,18 +13,26 @@
  * - Streaming output with visual feedback
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 import type { Memory, MemoryType } from '@ecuabyte/cortex-shared';
 import * as vscode from 'vscode';
 import type { AIScanWebview } from './aiScanWebview';
 import { AIProvider, CortexConfig } from './config';
+import {
+  type CliProviderId,
+  discoverCliProviders,
+  getProviderCandidatesForSelection,
+} from './providerDiscovery';
 // import { AIScanResult, AIMemory, ProjectContext, ProjectArea } from './types';
 import {
   AnthropicModelAdapter,
   type AnthropicModelId,
+  CliModelAdapter,
   DeepSeekModelAdapter,
+  FallbackModelAdapter,
   GeminiModelAdapter,
   type GeminiModelId,
   MistralModelAdapter,
@@ -33,13 +41,23 @@ import {
   OpenAIModelAdapter,
   type OpenAIModelId,
 } from './providers';
+import {
+  getDirectProviderOrder,
+  mayPromptForProvider,
+  parseProjectContextResponse,
+  type ScanRunMode,
+  shouldShowScanSurfaces,
+  shouldUseNativeModels,
+} from './scanRuntime';
 import type { MemoryStore } from './storage';
 
 export interface AIMemory {
+  id?: number | string;
   content: string;
   type: MemoryType;
   source: string;
   tags: string[];
+  [key: string]: unknown;
 }
 
 export interface AIScanResult {
@@ -60,6 +78,18 @@ interface ProjectContext {
   areas: ProjectArea[];
   existingMemories: string;
   language: string; // Detected language for output (e.g., "English", "Spanish", "Portuguese")
+}
+
+export class NoProviderAvailableError extends Error {
+  constructor() {
+    super('No configured AI provider is available');
+    this.name = 'NoProviderAvailableError';
+  }
+}
+
+interface ModelSelectionOptions {
+  interactive: boolean;
+  accessInformation?: vscode.LanguageModelAccessInformation;
 }
 
 export interface ProjectArea {
@@ -236,9 +266,100 @@ function formatExistingMemories(memories: Memory[]): string {
  * 2. Check for any stored API keys (Gemini, OpenAI, Anthropic)
  * 3. Prompt user to choose provider and enter API key
  */
+async function createDirectAdapter(
+  provider: AIProvider,
+  secrets?: vscode.SecretStorage
+): Promise<ModelAdapter | null> {
+  if (!secrets) return null;
+  try {
+    switch (provider) {
+      case AIProvider.Gemini:
+        return GeminiModelAdapter.fromSecrets(secrets);
+      case AIProvider.OpenAI:
+        return OpenAIModelAdapter.fromSecrets(secrets);
+      case AIProvider.Anthropic:
+        return AnthropicModelAdapter.fromSecrets(secrets);
+      case AIProvider.Mistral:
+        return MistralModelAdapter.fromSecrets(secrets);
+      case AIProvider.DeepSeek:
+        return DeepSeekModelAdapter.fromSecrets(secrets);
+      case AIProvider.Ollama:
+        return OllamaModelAdapter.fromSecrets(secrets);
+      default:
+        return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+function resolveCliExecutable(command: string): string | undefined {
+  const resolver = process.platform === 'win32' ? 'where.exe' : 'which';
+  try {
+    return execFileSync(resolver, [command], {
+      encoding: 'utf8',
+      timeout: 1000,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .find(Boolean);
+  } catch {
+    return undefined;
+  }
+}
+
+function toCliProviderId(provider: AIProvider | 'auto'): CliProviderId | 'auto' | undefined {
+  switch (provider) {
+    case AIProvider.Codex:
+      return 'codex';
+    case AIProvider.Claude:
+      return 'claude';
+    case AIProvider.Gemini:
+      return 'gemini';
+    case AIProvider.Copilot:
+      return 'copilot';
+    case AIProvider.Auto:
+      return 'auto';
+    default:
+      return undefined;
+  }
+}
+
+async function createCliAdapter(
+  provider: AIProvider | 'auto',
+  workspacePath: string,
+  channel: vscode.OutputChannel
+): Promise<ModelAdapter | null> {
+  const candidates = discoverCliProviders({
+    env: process.env,
+    homeDir: homedir(),
+    resolveCommand: resolveCliExecutable,
+    fileExists: existsSync,
+  });
+  const requested = toCliProviderId(provider);
+  if (requested === undefined) return null;
+
+  const selectable = getProviderCandidatesForSelection(candidates, requested);
+  const adapters = selectable.map((candidate) => {
+    channel.appendLine(
+      `CLI detectado: ${candidate.id} (${candidate.authSources.join(', ') || 'configuración local'})`
+    );
+    return new CliModelAdapter(candidate, workspacePath);
+  });
+
+  return adapters.length === 0
+    ? null
+    : adapters.length === 1
+      ? adapters[0]
+      : new FallbackModelAdapter(adapters);
+}
+
 async function selectBestModel(
   channel: vscode.OutputChannel,
-  secrets?: vscode.SecretStorage
+  secrets?: vscode.SecretStorage,
+  workspacePath?: string,
+  options: ModelSelectionOptions = { interactive: true }
 ): Promise<{ adapter: ModelAdapter; nativeModel?: vscode.LanguageModelChat }> {
   // Helper to detect current editor
   const detectEditor = (): 'Cursor' | 'Windsurf' | 'Antigravity' | 'VS Code' => {
@@ -252,14 +373,56 @@ async function selectBestModel(
   const editor = detectEditor();
   channel.appendLine(`🖥️ Editor detectado: ${editor}`);
 
-  // 1. Try native vscode.lm API first
-  // Note: Cursor currently does NOT support vscode.lm API (Jan 2026)
-  if (vscode.lm?.selectChatModels) {
-    const allModels = await vscode.lm.selectChatModels({});
+  const configuredProvider = CortexConfig.provider;
+  const cliWorkspace =
+    workspacePath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.cwd();
 
-    if (allModels.length > 0) {
+  // Prefer configured BYOK/local providers. They do not require Copilot consent.
+  if (configuredProvider !== AIProvider.Auto) {
+    const directAdapter = await createDirectAdapter(configuredProvider, secrets);
+    if (directAdapter) {
+      channel.appendLine(`âœ“ Usando ${directAdapter.name}`);
+      return { adapter: directAdapter };
+    }
+    const cliAdapter = await createCliAdapter(configuredProvider, cliWorkspace, channel);
+    if (cliAdapter) {
+      channel.appendLine(`CLI seleccionado: ${cliAdapter.name}`);
+      return { adapter: cliAdapter };
+    }
+    if (!options.interactive) throw new NoProviderAvailableError();
+  } else {
+    for (const provider of getDirectProviderOrder('auto')) {
+      const directAdapter = await createDirectAdapter(provider as AIProvider, secrets);
+      if (directAdapter) {
+        channel.appendLine(`âœ“ Auto-detectado: ${directAdapter.name}`);
+        return { adapter: directAdapter };
+      }
+    }
+    const cliAdapter = await createCliAdapter(AIProvider.Auto, cliWorkspace, channel);
+    if (cliAdapter) {
+      channel.appendLine(`CLI auto-detectado: ${cliAdapter.name}`);
+      return { adapter: cliAdapter };
+    }
+  }
+
+  if (!mayPromptForProvider(options.interactive ? 'manual' : 'startup')) {
+    throw new NoProviderAvailableError();
+  }
+
+  // Native models (including Copilot) are only queried from a user action.
+  if (
+    shouldUseNativeModels(options.interactive ? 'manual' : 'startup') &&
+    vscode.lm?.selectChatModels
+  ) {
+    const allModels = await vscode.lm.selectChatModels({});
+    const access = options.accessInformation;
+    const accessibleModels = access
+      ? allModels.filter((model) => access.canSendRequest(model) !== false)
+      : allModels;
+
+    if (accessibleModels.length > 0) {
       channel.appendLine(`📋 Modelos nativos disponibles en ${editor} (${allModels.length}):`);
-      for (const m of allModels.slice(0, 10)) {
+      for (const m of accessibleModels.slice(0, 10)) {
         channel.appendLine(`   - ${m.name || m.id}`);
       }
 
@@ -295,7 +458,7 @@ async function selectBestModel(
       ];
 
       for (const priority of priorityNames) {
-        const match = allModels.find(
+        const match = accessibleModels.find(
           (m) =>
             m.name?.toLowerCase().includes(priority) ||
             m.id?.toLowerCase().includes(priority.replace(/\s+/g, '-'))
@@ -311,7 +474,7 @@ async function selectBestModel(
       }
 
       // Use first available model
-      const fallback = allModels[0];
+      const fallback = accessibleModels[0];
       channel.appendLine(`\n⚠️ Fallback (nativo): ${fallback.name || fallback.id}`);
       const { VSCodeModelAdapter } = await import('./providers');
       return {
@@ -327,9 +490,6 @@ async function selectBestModel(
       `   Se requiere configurar una API Key manual para Gemini/OpenAI/Anthropic.`
     );
   }
-
-  // 2. Check for configured provider
-  const configuredProvider = CortexConfig.provider;
 
   if (configuredProvider !== AIProvider.Auto) {
     channel.appendLine(`\n⚙️ Proveedor configurado: ${configuredProvider}`);
@@ -421,6 +581,12 @@ async function selectBestModel(
         description: 'Claude 4.5 Opus / 3.7',
         value: AIProvider.Anthropic,
       },
+      {
+        label: '$(sparkle) Mistral',
+        description: 'Mistral / Codestral',
+        value: AIProvider.Mistral,
+      },
+      { label: '$(zap) DeepSeek', description: 'DeepSeek V3 / Coder', value: AIProvider.DeepSeek },
       { label: '$(server) Ollama', description: 'Local Models', value: AIProvider.Ollama },
       {
         label: '$(clippy) Copy Prompt to Clipboard',
@@ -569,6 +735,44 @@ async function selectBestModel(
 // PHASE 1: Build Project Context
 // ============================================================================
 
+function createFallbackProjectContext(
+  rootPath: string,
+  anchors: Array<{ name: string; content: string }>,
+  existingMemories: string
+): ProjectContext {
+  const areas: ProjectArea[] = [];
+
+  try {
+    for (const entry of readdirSync(rootPath, { withFileTypes: true })) {
+      if (entry.name.startsWith('.') || SKIP_DIRS.includes(entry.name)) continue;
+      const areaPath = entry.isDirectory() ? `${entry.name}/` : entry.name;
+      areas.push({
+        name: entry.name,
+        path: areaPath,
+        needsDeepAnalysis: entry.isDirectory(),
+        keyFiles: entry.isDirectory() ? [] : [entry.name],
+        reason: 'Fallback context generated without a valid AI response',
+      });
+      if (areas.length >= 12) break;
+    }
+  } catch {
+    // Keep an empty but valid area list when the workspace cannot be read.
+  }
+
+  const anchorText = anchors.find((anchor) => /readme/i.test(anchor.name))?.content || '';
+  const purpose = anchorText.match(/^(?:#|##)\s+(.+)$/m)?.[1]?.trim();
+
+  return {
+    projectName: basename(rootPath),
+    purpose: purpose || 'Local software project',
+    techStack: [],
+    architecture: 'Architecture could not be inferred automatically; inspect the listed areas.',
+    areas,
+    existingMemories,
+    language: 'English',
+  };
+}
+
 async function buildProjectContext(
   model: ModelAdapter,
   rootPath: string,
@@ -645,6 +849,17 @@ IMPORTANT:
   }
 
   // Parse JSON response
+  const fallback = createFallbackProjectContext(rootPath, anchors, existingMemories);
+  const parsedContext = parseProjectContextResponse(fullResponse, fallback);
+  if (parsedContext === fallback) {
+    channel.appendLine('\nWarning: invalid AI context response; using deterministic fallback.');
+    Logger.getInstance().warn('AI context response was invalid; deterministic fallback used.');
+  } else {
+    channel.appendLine(`\nDetected language: ${parsedContext.language}`);
+  }
+  return parsedContext;
+
+  /* Legacy parser retained below for reference during migration.
   try {
     // Extract JSON from response (handle markdown code blocks)
     let jsonStr = fullResponse;
@@ -678,6 +893,7 @@ IMPORTANT:
       language: 'English',
     };
   }
+  */
 }
 
 // ============================================================================
@@ -693,12 +909,18 @@ export async function scanProjectWithAI(
   webview?: AIScanWebview,
   onMemorySaved?: OnMemorySaved,
   refreshTree?: () => void,
-  secrets?: vscode.SecretStorage
+  secrets?: vscode.SecretStorage,
+  options: {
+    mode?: ScanRunMode;
+    accessInformation?: vscode.LanguageModelAccessInformation;
+  } = {}
 ): Promise<AIScanResult> {
+  const mode = options.mode || 'manual';
+  const interactive = mode === 'manual';
   const logger = Logger.getInstance();
   const channel = getOutputChannel();
   channel.clear();
-  channel.show(true);
+  if (shouldShowScanSurfaces(mode)) channel.show(true);
 
   // Sync logger with UI channel
   const log = (msg: string) => {
@@ -718,13 +940,21 @@ export async function scanProjectWithAI(
   let nativeModel: vscode.LanguageModelChat | undefined;
 
   try {
-    const result = await selectBestModel(channel, secrets);
+    const result = await selectBestModel(channel, secrets, projectPath, {
+      interactive,
+      accessInformation: options.accessInformation,
+    });
     adapter = result.adapter;
     nativeModel = result.nativeModel;
   } catch (error: unknown) {
     // biome-ignore lint/suspicious/noExplicitAny: Error object is loosely typed
     const err = error as any;
     logger.error('Model selection failed', err);
+
+    if (error instanceof NoProviderAvailableError) {
+      log('\nℹ️ No hay un proveedor AI configurado; se omite el escaneo automático.');
+      return { memories: [], filesAnalyzed: 0, modelUsed: 'none', savedCount: 0 };
+    }
 
     // Handle connection refused/network errors specifically
     if (err.message?.includes('fetch failed') || err.message?.includes('ECONNREFUSED')) {
@@ -735,12 +965,14 @@ export async function scanProjectWithAI(
       log('   - Sin conexión a internet (para Gemini/OpenAI)');
 
       webview?.setStatus('error', 'Error: AI Provider unreachable');
-      vscode.window.showErrorMessage('Cortex: Cannot connect to AI provider. Is Ollama running?');
+      if (interactive) {
+        vscode.window.showErrorMessage('Cortex: Cannot connect to AI provider. Is Ollama running?');
+      }
       return { memories: [], filesAnalyzed: 0, modelUsed: 'none', savedCount: 0 };
     }
 
     // Handle clipboard fallback request
-    if (error.message === 'CLIPBOARD_FALLBACK') {
+    if (err.message === 'CLIPBOARD_FALLBACK') {
       log('\\n📋 Usuario solicitó copiar prompt al portapapeles...');
       webview?.setStatus('selecting', 'Generando prompt para copiar...');
 

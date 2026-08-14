@@ -192,7 +192,7 @@ export class MemoryStore implements IMemoryStore {
   async search(query: string, options?: { type?: string; limit?: number }) {
     await this.ensureInitialized();
     let sql = 'SELECT * FROM memories WHERE content LIKE ?';
-    const params: (string | number | boolean | null)[] = [`%${query}%`];
+    const params: SqlValue[] = [`%${query}%`];
     if (options?.type) {
       sql += ' AND type = ?';
       params.push(options.type);
@@ -211,7 +211,7 @@ export class MemoryStore implements IMemoryStore {
   async list(options?: { type?: string; limit?: number }) {
     await this.ensureInitialized();
     let sql = 'SELECT * FROM memories';
-    const params: (string | number | boolean | null)[] = [];
+    const params: SqlValue[] = [];
     if (options?.type) {
       sql += ' WHERE type = ?';
       params.push(options.type);
@@ -231,13 +231,13 @@ export class MemoryStore implements IMemoryStore {
     await this.ensureInitialized();
     // Simplified update... (omitted detailed field building for complexity, assuming full file is needed)
     // Actually I should implement update properly.
-    const updates = [];
-    const params = [];
-    if (memory.content) {
+    const updates: string[] = [];
+    const params: SqlValue[] = [];
+    if (typeof memory.content === 'string' && memory.content) {
       updates.push('content=?');
       params.push(memory.content);
     }
-    if (memory.type) {
+    if (typeof memory.type === 'string' && memory.type) {
       updates.push('type=?');
       params.push(memory.type);
     }

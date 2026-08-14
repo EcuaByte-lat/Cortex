@@ -51,7 +51,7 @@ export class OpenAIModelAdapter implements ModelAdapter {
 
   constructor(
     private apiKey: string,
-    private modelId: OpenAIModelId = 'gpt-4o-mini'
+    private modelId: OpenAIModelId = 'gpt-4o'
   ) {
     this.name = OPENAI_MODELS[modelId]?.name || modelId;
   }
@@ -126,6 +126,8 @@ export class OpenAIModelAdapter implements ModelAdapter {
     if (!apiKey) {
       apiKey = (await secrets.get(SECRET_KEY)) || '';
     }
+
+    if (!apiKey) apiKey = process.env['OPENAI_API_KEY'] || '';
 
     if (!apiKey) return null;
 

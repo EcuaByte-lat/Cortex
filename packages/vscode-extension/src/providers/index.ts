@@ -28,7 +28,11 @@ export interface ModelAdapter {
     | 'anthropic'
     | 'mistral'
     | 'deepseek'
-    | 'ollama';
+    | 'ollama'
+    | 'codex'
+    | 'claude'
+    | 'gemini-cli'
+    | 'copilot';
   sendRequest(
     messages: Array<{ role: 'user' | 'assistant'; content: string }>,
     token: vscode.CancellationToken
@@ -75,6 +79,24 @@ export const PROVIDERS = {
     defaultModel: 'deepseek-coder:latest',
     topModel: 'deepseek-coder:v4',
     freeApiUrl: 'https://ollama.com/',
+  },
+  codex: {
+    name: 'OpenAI Codex CLI',
+    defaultModel: 'configured-by-codex',
+    topModel: 'configured-by-codex',
+    freeApiUrl: 'https://developers.openai.com/codex/cli/',
+  },
+  claude: {
+    name: 'Claude Code CLI',
+    defaultModel: 'configured-by-claude',
+    topModel: 'configured-by-claude',
+    freeApiUrl: 'https://docs.anthropic.com/en/docs/claude-code',
+  },
+  copilot: {
+    name: 'GitHub Copilot CLI',
+    defaultModel: 'auto',
+    topModel: 'auto',
+    freeApiUrl: 'https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-getting-started',
   },
   auto: {
     name: 'Auto-Detect',
@@ -144,6 +166,7 @@ export class VSCodeModelAdapter implements ModelAdapter {
 }
 
 export { ANTHROPIC_MODELS, AnthropicModelAdapter, type AnthropicModelId } from './anthropic';
+export { CliModelAdapter, FallbackModelAdapter } from './cli';
 export { DEEPSEEK_MODELS, DeepSeekModelAdapter, type DeepSeekModelId } from './deepseek';
 export { GEMINI_MODELS, GeminiModelAdapter, type GeminiModelId } from './gemini';
 export { MISTRAL_MODELS, MistralModelAdapter, type MistralModelId } from './mistral';

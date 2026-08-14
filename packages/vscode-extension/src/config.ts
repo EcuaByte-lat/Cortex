@@ -9,6 +9,9 @@ export enum AIProvider {
   Mistral = 'mistral',
   DeepSeek = 'deepseek',
   Ollama = 'ollama',
+  Codex = 'codex',
+  Claude = 'claude',
+  Copilot = 'copilot',
 }
 
 export const CortexConfig = {
@@ -91,6 +94,9 @@ export const CortexConfig = {
       AIProvider.DeepSeek,
       AIProvider.Mistral,
       AIProvider.Ollama,
+      AIProvider.Codex,
+      AIProvider.Claude,
+      AIProvider.Copilot,
     ];
   },
 };

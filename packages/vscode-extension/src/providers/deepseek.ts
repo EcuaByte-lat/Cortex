@@ -80,6 +80,7 @@ export class DeepSeekModelAdapter implements ModelAdapter {
   ): Promise<DeepSeekModelAdapter | null> {
     let apiKey = CortexConfig.getApiKey(AIProvider.DeepSeek);
     if (!apiKey) apiKey = (await secrets.get(SECRET_KEY)) || '';
+    if (!apiKey) apiKey = process.env['DEEPSEEK_API_KEY'] || '';
     if (!apiKey) return null;
 
     const configuredModel = CortexConfig.getModel(AIProvider.DeepSeek) as DeepSeekModelId;

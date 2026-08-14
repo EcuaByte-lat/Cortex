@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { AIMemory, ProjectArea } from './aiScanner';
+import { type DashboardMemory, DashboardMemoryState } from './scanRuntime';
 
 /**
  * Manages the AI Analysis Dashboard Webview
@@ -11,7 +12,8 @@ export class AIScanWebview {
   // State persistence
   private projectContext: { name: string; techStack: string[] } | undefined;
   private areas: ProjectArea[] = [];
-  private memories: AIMemory[] = [];
+  private memoryState = new DashboardMemoryState<AIMemory & DashboardMemory>();
+  private persistenceWrite: Promise<void> = Promise.resolve();
   private status: 'selecting' | 'analyzing' | 'complete' | 'error' = 'selecting';
   private statusMessage: string = '';
   private modelName: string = '';
@@ -34,7 +36,7 @@ export class AIScanWebview {
     if (state) {
       this.projectContext = state.projectContext;
       this.areas = state.areas || [];
-      this.memories = state.memories || [];
+      this.memoryState.hydrate(state.memories || []);
       this.status = state.status || 'selecting';
       this.statusMessage = state.statusMessage || '';
       this.modelName = state.modelName || '';
@@ -43,15 +45,19 @@ export class AIScanWebview {
   }
 
   private savePersistence() {
-    this.context.workspaceState.update('cortexDashboardState', {
+    const snapshot = {
       projectContext: this.projectContext,
       areas: this.areas,
-      memories: this.memories,
+      memories: this.memoryState.getAll(),
       status: this.status,
       statusMessage: this.statusMessage,
       modelName: this.modelName,
       summary: this.summary,
-    });
+    };
+
+    this.persistenceWrite = this.persistenceWrite
+      .then(() => this.context.workspaceState.update('cortexDashboardState', snapshot))
+      .catch(() => undefined);
   }
 
   /**
@@ -61,13 +67,13 @@ export class AIScanWebview {
   public clearState() {
     this.projectContext = undefined;
     this.areas = [];
-    this.memories = [];
+    this.memoryState.clear();
     this.status = 'selecting';
     this.statusMessage = '';
     this.modelName = '';
     this.summary = undefined;
     this.logStream = '';
-    this.context.workspaceState.update('cortexDashboardState', undefined);
+    this.savePersistence();
     // Notify webview to reset
     this.postMessage({ type: 'clearState' });
   }
@@ -133,7 +139,7 @@ export class AIScanWebview {
       state: {
         projectContext: this.projectContext,
         areas: this.areas,
-        memories: this.memories,
+        memories: this.memoryState.getAll(),
         status: this.status,
         statusMessage: this.statusMessage,
         modelName: this.modelName,
@@ -203,11 +209,11 @@ export class AIScanWebview {
   }
 
   getMemories(): AIMemory[] {
-    return this.memories;
+    return this.memoryState.getAll();
   }
 
   addMemory(memory: AIMemory) {
-    this.memories.push(memory);
+    if (!this.memoryState.add(memory)) return;
     this.savePersistence();
     this.postMessage({ type: 'memory', memory });
   }
@@ -775,8 +781,24 @@ export class AIScanWebview {
         }
 
         if (msg.type === 'summary') {
+            if (msg.memories !== undefined) {
+                valMemories.innerText = msg.memories;
+                document.getElementById('memory-count-badge').innerText = msg.memories;
+                const barEl = document.getElementById('bar-memories');
+                if (barEl) barEl.style.width = Math.min(msg.memories * 2, 100) + '%';
+            }
             if (msg.files) valFiles.innerText = msg.files;
             if (msg.model) document.getElementById('model-name').innerText = msg.model;
+        }
+
+        if (msg.type === 'hydrate' && msg.state?.summary) {
+            const summary = msg.state.summary;
+            if (summary.memories !== undefined) {
+                valMemories.innerText = summary.memories;
+                document.getElementById('memory-count-badge').innerText = summary.memories;
+            }
+            if (summary.files !== undefined) valFiles.innerText = summary.files;
+            if (summary.model) document.getElementById('model-name').innerText = summary.model;
         }
 
         if (msg.type === 'systemStatus') {
@@ -796,9 +818,6 @@ export class AIScanWebview {
             btnAnalyze.innerHTML = '<i class="ph-bold ph-check"></i> Complete';
             btnAnalyze.style.background = 'var(--color-success)';
         }
-
-        // Signal Readiness to Backend
-        postMsg('ready');
 
         if (msg.type === 'highlightItem') {
              if (msg.data.type === 'debt') {
