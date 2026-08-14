@@ -1,5 +1,11 @@
 # @ecuabyte/cortex-core
 
+## 0.9.1
+
+### Patch Changes
+
+- [#51](https://github.com/EcuaByte-lat/Cortex/pull/51) [`7a2b1a0`](https://github.com/EcuaByte-lat/Cortex/commit/7a2b1a0957f2194da4ffbe45d99553c5adb4e2cf) Thanks [@aquirozdev](https://github.com/aquirozdev)! - Align public package metadata, editor copy, and onboarding documentation with Cortex's evidence-backed engineering state and handoff positioning.
+
 ## 0.9.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-shared",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Shared types and utilities for Cortex engineering state integrations",
   "type": "module",
   "keywords": [
