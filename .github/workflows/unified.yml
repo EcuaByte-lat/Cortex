@@ -182,6 +182,15 @@ jobs:
       # ─────────────────────────────────────────────────────────────────────────
       # VS Code Extension Publishing (version-gated against Marketplace)
       # ─────────────────────────────────────────────────────────────────────────
+      - name: Login to Microsoft Entra for Marketplace publishing
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+        env:
+          AZURE_CORE_OUTPUT: none
+
       - name: Publish VS Code Extension
         run: |
           EXTENSION_VERSION=$(node -p "require('./packages/vscode-extension/package.json').version")
@@ -194,7 +203,7 @@ jobs:
           if [[ "$EXTENSION_VERSION" != "$MARKETPLACE_VERSION" ]]; then
             echo "📦 Publishing VS Code Extension..."
             cd packages/vscode-extension
-            bunx @vscode/vsce publish --no-dependencies --oidc
+            bunx @vscode/vsce publish --no-dependencies --azure-credential
             echo "✅ VS Code Extension published successfully"
           else
             echo "ℹ️ VS Code Marketplace already has $EXTENSION_VERSION, skipping."

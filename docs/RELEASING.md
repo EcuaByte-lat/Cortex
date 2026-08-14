@@ -39,17 +39,27 @@ published from this public repository.
 
 The VS Code extension is intentionally not published to npm. Its distribution
 channels are VS Code Marketplace and Open VSX. Marketplace publication uses
-`@vscode/vsce publish --oidc`, which exchanges the GitHub Actions OIDC token
-for a short-lived Marketplace credential and does not require `VSCE_PAT`.
+Microsoft Entra workload identity federation with
+`@vscode/vsce publish --azure-credential`. The workflow obtains a short-lived
+Azure DevOps access token through `azure/login@v2`; it does not require
+`VSCE_PAT`.
 
-Configure a Trusted Publishing policy for the `EcuaByte` publisher in the
-Visual Studio Marketplace, matching this repository and workflow:
+Create a user-assigned managed identity in Azure and configure a federated
+credential for this GitHub Actions subject:
 
-- Repository: `EcuaByte-lat/Cortex`
-- Workflow: `unified.yml`
+- Issuer: `https://token.actions.githubusercontent.com/`
+- Subject: `repo:EcuaByte-lat/Cortex:ref:refs/heads/main`
+- Audience: `api://AzureADTokenExchange`
 
-The workflow already requests `id-token: write`. Do not add a Marketplace PAT
-or an Azure client secret to the repository.
+Authorize that identity in the `EcuaByte` Visual Studio Marketplace publisher
+with the Contributor role. Then add these GitHub Actions secrets:
+
+- `AZURE_CLIENT_ID`: managed identity client ID
+- `AZURE_TENANT_ID`: Microsoft Entra tenant ID
+
+The workflow already requests `id-token: write` and uses
+`allow-no-subscriptions: true`; no Azure subscription ID, client secret, or
+Marketplace PAT is needed by the release job.
 
 After configuring Trusted Publishing, rerun a failed release job from GitHub
 Actions. Do not add an npm token to the repository or commit a local `.npmrc`.
