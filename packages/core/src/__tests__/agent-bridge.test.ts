@@ -45,6 +45,14 @@ describe('AgentBridge', () => {
     expect(result.task?.objective).toBe('Implement agent continuity');
     expect(result.evidence?.summary).toContain('[REDACTED]');
     expect(result.evidence?.summary).not.toContain('sk-12345678901234567890');
+
+    const events = await store.listEventLog();
+    expect(events).toHaveLength(1);
+    expect(events[0]?.type).toBe('prompt.submitted');
+    expect(events[0]?.summary).toContain('[REDACTED]');
+    expect(events[0]?.summary).not.toContain('sk-12345678901234567890');
+    expect(events[0]?.taskId).toBe(result.task?.id);
+    expect(events[0]?.attemptId).toBe(result.attempt?.id);
   });
 
   test('reuses the task and attempt for a session and checkpoints when it becomes idle', async () => {

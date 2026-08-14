@@ -1,6 +1,6 @@
 import { Database } from 'bun:sqlite';
 import { randomUUID } from 'node:crypto';
-import { mkdirSync } from 'node:fs';
+import { appendFileSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
@@ -8,6 +8,7 @@ import {
   type AgentEvent,
   CONTINUITY_SCHEMA_VERSION,
   type ContinuityAttempt,
+  type ContinuityEventRecord,
   type ContinuityEvidence,
   type ContinuityHandoff,
   type ContinuityStatus,
@@ -124,12 +125,32 @@ interface HandoffRow {
   payload: string;
 }
 
+interface EventLogRow {
+  event_id: string;
+  event_type: AgentEvent['type'];
+  session_id: string;
+  agent: string;
+  repository: string;
+  project_id: string | null;
+  task_id: string | null;
+  attempt_id: string | null;
+  summary: string | null;
+  details: string | null;
+  status: EvidenceStatus | null;
+  occurred_at: string | null;
+  recorded_at: string;
+}
+
 export interface EventClaimInput {
   eventId: string;
   harness: string;
   sessionId: string;
   eventType: AgentEvent['type'];
   recordedAt: string;
+}
+
+export interface EventLogInput extends Omit<ContinuityEventRecord, 'recordedAt'> {
+  recordedAt?: string;
 }
 
 function createId(prefix: string): string {
@@ -180,8 +201,27 @@ function toEvidence(row: EvidenceRow): ContinuityEvidence {
   };
 }
 
+function toEventRecord(row: EventLogRow): ContinuityEventRecord {
+  return {
+    eventId: row.event_id,
+    type: row.event_type,
+    sessionId: row.session_id,
+    agent: parseJson<ActorIdentity>(row.agent),
+    repository: parseJson<RepositoryContext>(row.repository),
+    ...(row.project_id ? { projectId: row.project_id } : {}),
+    ...(row.task_id ? { taskId: row.task_id } : {}),
+    ...(row.attempt_id ? { attemptId: row.attempt_id } : {}),
+    ...(row.summary ? { summary: row.summary } : {}),
+    ...(row.details ? { details: parseJson<Record<string, unknown>>(row.details) } : {}),
+    ...(row.status ? { status: row.status } : {}),
+    ...(row.occurred_at ? { occurredAt: row.occurred_at } : {}),
+    recordedAt: row.recorded_at,
+  };
+}
+
 export class ContinuityStore {
   private readonly db: Database;
+  private readonly eventJournalPath: string | undefined;
 
   constructor(options: ContinuityStoreOptions = {}) {
     const dbPath =
@@ -189,6 +229,8 @@ export class ContinuityStore {
       process.env['CORTEX_CONTINUITY_DB'] ??
       join(homedir(), '.cortex', 'continuity.db');
     if (dbPath !== ':memory:') mkdirSync(dirname(dbPath), { recursive: true });
+    this.eventJournalPath =
+      dbPath === ':memory:' ? undefined : join(dirname(dbPath), 'continuity.events.ndjson');
 
     this.db = new Database(dbPath);
     this.db.exec(`
@@ -250,6 +292,23 @@ export class ContinuityStore {
         event_type TEXT NOT NULL,
         recorded_at TEXT NOT NULL,
         PRIMARY KEY (event_id, harness, session_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS continuity_event_log (
+        event_id TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        session_id TEXT NOT NULL,
+        agent TEXT NOT NULL,
+        repository TEXT NOT NULL,
+        project_id TEXT,
+        task_id TEXT,
+        attempt_id TEXT,
+        summary TEXT,
+        details TEXT,
+        status TEXT,
+        occurred_at TEXT,
+        recorded_at TEXT NOT NULL,
+        PRIMARY KEY (event_id, event_type, session_id)
       );
 
       CREATE INDEX IF NOT EXISTS continuity_evidence_task_idx
@@ -330,6 +389,58 @@ export class ContinuityStore {
       .run(input.eventId, input.harness, input.sessionId, input.eventType, input.recordedAt);
 
     return result.changes === 1;
+  }
+
+  async recordEvent(input: EventLogInput): Promise<ContinuityEventRecord> {
+    const recordedAt = input.recordedAt ?? new Date().toISOString();
+    const event: ContinuityEventRecord = {
+      ...input,
+      recordedAt,
+    };
+
+    const result = this.db
+      .prepare(
+        `INSERT OR IGNORE INTO continuity_event_log
+          (event_id, event_type, session_id, agent, repository, project_id, task_id, attempt_id, summary, details, status, occurred_at, recorded_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+      .run(
+        event.eventId,
+        event.type,
+        event.sessionId,
+        JSON.stringify(event.agent),
+        JSON.stringify(event.repository),
+        event.projectId ?? null,
+        event.taskId ?? null,
+        event.attemptId ?? null,
+        event.summary ?? null,
+        event.details ? JSON.stringify(event.details) : null,
+        event.status ?? null,
+        event.occurredAt ?? null,
+        event.recordedAt
+      );
+
+    if (result.changes === 1 && this.eventJournalPath) {
+      appendFileSync(this.eventJournalPath, `${JSON.stringify(event)}\n`, 'utf8');
+    }
+
+    return event;
+  }
+
+  async listEventLog(
+    options: { taskId?: string; limit?: number } = {}
+  ): Promise<ContinuityEventRecord[]> {
+    const conditions = options.taskId ? ' WHERE task_id = ?' : '';
+    const params = options.taskId ? [options.taskId] : [];
+    const limit = options.limit ?? 200;
+    const rows = this.db
+      .prepare(
+        `SELECT * FROM continuity_event_log${conditions}
+         ORDER BY COALESCE(occurred_at, recorded_at) DESC LIMIT ?`
+      )
+      .all(...params, limit) as EventLogRow[];
+
+    return rows.map(toEventRecord);
   }
 
   async getTaskById(id: string): Promise<ContinuityTask | null> {

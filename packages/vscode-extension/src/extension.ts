@@ -6,6 +6,8 @@ import type { Memory } from '@ecuabyte/cortex-shared';
 import * as vscode from 'vscode';
 import { getProjectId } from './context';
 import { ContextObserver } from './contextObserver';
+import type { ContinuityDashboardSnapshot, DashboardTask } from './continuityDashboard';
+import { ContinuityMonitor } from './continuityMonitor';
 import { registerCortexTools } from './cortexTools';
 import { MemoryTreeProvider } from './memoryTreeProvider';
 import { MemoryWebviewProvider } from './memoryWebviewProvider';
@@ -16,6 +18,49 @@ import type { Tool } from './toolScanner';
 import { ToolTreeProvider } from './toolTreeProvider';
 
 const execAsync = promisify(exec);
+
+function renderDashboardHandoff(
+  snapshot: ContinuityDashboardSnapshot,
+  task: DashboardTask
+): string {
+  const events = snapshot.events.filter((event) => event.taskId === task.id).slice(0, 12);
+  const evidence = task.evidence;
+  return [
+    `# Cortex Handoff: ${task.objective}`,
+    '',
+    `- Task: \`${task.id}\``,
+    `- Status: **${task.status}**`,
+    `- Agent: ${task.actor?.harness ?? 'unknown'}${task.actor?.model ? ` (${task.actor.model})` : ''}`,
+    `- Repository: ${task.repository.branch ?? 'unknown branch'} @ ${task.repository.commit ?? 'unknown commit'}`,
+    '',
+    '## Evidence health',
+    '',
+    `- Current: ${evidence.current}`,
+    `- Verified: ${evidence.verified}`,
+    `- Needs review: ${evidence.unverified}`,
+    `- Failed: ${evidence.failed}`,
+    `- Conflicts: ${evidence.conflicts}`,
+    '',
+    '## Recent activity',
+    '',
+    events.length > 0
+      ? events
+          .map((event) => `- **${event.type}** — ${event.summary} _(status: ${event.status})_`)
+          .join('\n')
+      : '- No activity recorded.',
+    '',
+    '## Next safe action',
+    '',
+    task.status === 'blocked'
+      ? '- Resolve the blocker and verify the repository before continuing.'
+      : task.status === 'waiting'
+        ? '- Inspect the latest event and resume only after confirming the current branch and commit.'
+        : '- Continue from the latest event and capture the next high-signal evidence.',
+    '',
+    '> Generated locally by Cortex. Re-check repository state before trusting stale claims.',
+    '',
+  ].join('\n');
+}
 
 export async function activate(context: vscode.ExtensionContext) {
   try {
@@ -168,6 +213,18 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log('[Cortex] Initializing Dashboard...');
     const { AIScanWebview } = await import('./aiScanWebview');
     const dashboardWebview = new AIScanWebview(context.extensionUri, context);
+    const continuityMonitor = new ContinuityMonitor({ extensionPath: context.extensionPath });
+    const workspaceIdentity = () => {
+      const folder = vscode.workspace.workspaceFolders?.[0];
+      return {
+        name: folder?.name ?? 'Workspace',
+        root: folder?.uri.fsPath ?? '',
+      };
+    };
+    const refreshContinuity = async () => {
+      const snapshot = await continuityMonitor.read(workspaceIdentity());
+      dashboardWebview.setContinuitySnapshot(snapshot);
+    };
 
     // --- Connect Components (Iron Man Wiring) ---
     observer.setWebview(dashboardWebview);
@@ -197,8 +254,15 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
       vscode.commands.registerCommand('cortex.openDashboard', () => {
         dashboardWebview.show(context);
+        void refreshContinuity();
       })
     );
+
+    void refreshContinuity();
+    const continuityTimer = setInterval(() => {
+      void refreshContinuity();
+    }, 1500);
+    context.subscriptions.push({ dispose: () => clearInterval(continuityTimer) });
 
     // Register commands
     console.log('[Cortex] Registering Commands...');
@@ -582,6 +646,8 @@ export async function activate(context: vscode.ExtensionContext) {
             db: dbStatus.ready ? 'ready' : 'error',
           });
 
+          await refreshContinuity();
+
           // If dashboard has no memories but DB does, fetch and populate
           const stats = await store.stats();
           if (stats.total > 0 && dashboardWebview.getMemories().length === 0) {
@@ -601,6 +667,48 @@ export async function activate(context: vscode.ExtensionContext) {
             db: 'error',
           });
         }
+      }
+
+      if (message.type === 'refreshDashboard') {
+        await refreshContinuity();
+      }
+
+      if (message.type === 'copyEvidence') {
+        await vscode.env.clipboard.writeText(JSON.stringify(payload, null, 2));
+        vscode.window.showInformationMessage('Evidence copied to clipboard.');
+      }
+
+      if (
+        message.type === 'copyHandoff' ||
+        message.type === 'openHandoff' ||
+        message.type === 'resumeTask'
+      ) {
+        const snapshot = dashboardWebview.getContinuitySnapshot();
+        if (!snapshot) {
+          vscode.window.showWarningMessage('No continuity state is available yet.');
+          return;
+        }
+        const task =
+          snapshot.tasks.find((item) => item.id === snapshot.activeTaskId) ?? snapshot.tasks[0];
+        if (!task) {
+          vscode.window.showInformationMessage('No active task is available for a handoff.');
+          return;
+        }
+        const handoff = renderDashboardHandoff(snapshot, task);
+        if (message.type === 'openHandoff') {
+          const document = await vscode.workspace.openTextDocument({
+            language: 'markdown',
+            content: handoff,
+          });
+          await vscode.window.showTextDocument(document, vscode.ViewColumn.Beside);
+          return;
+        }
+        await vscode.env.clipboard.writeText(handoff);
+        vscode.window.showInformationMessage(
+          message.type === 'resumeTask'
+            ? 'Handoff copied. Paste it into the next agent to resume safely.'
+            : 'Handoff copied to clipboard.'
+        );
       }
 
       if (message.type === 'startScan') {

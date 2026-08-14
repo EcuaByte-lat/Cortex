@@ -48,6 +48,25 @@ export class AgentBridge {
     }
 
     const context = await this.resolveContext(event);
+    await this.store.recordEvent({
+      eventId: event.eventId,
+      type: event.type,
+      sessionId: event.sessionId,
+      agent: { ...event.agent, sessionId: event.sessionId },
+      repository: event.repository,
+      ...(event.projectId || context.task?.projectId
+        ? { projectId: event.projectId ?? context.task?.projectId }
+        : {}),
+      ...(context.task?.id || event.taskId ? { taskId: context.task?.id ?? event.taskId } : {}),
+      ...(context.attempt?.id || event.attemptId
+        ? { attemptId: context.attempt?.id ?? event.attemptId }
+        : {}),
+      ...(event.summary ? { summary: this.redact(event.summary) } : {}),
+      ...(event.details ? { details: this.redactRecord(event.details) } : {}),
+      ...(event.status ? { status: event.status } : {}),
+      ...(event.occurredAt ? { occurredAt: event.occurredAt } : {}),
+      recordedAt,
+    });
     if (!context.task || !context.attempt) {
       return {
         accepted: true,

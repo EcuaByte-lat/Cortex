@@ -64,6 +64,22 @@ export interface AgentBridgeResult {
   handoff?: ContinuityHandoff;
 }
 
+export interface ContinuityEventRecord {
+  eventId: string;
+  type: AgentEventType;
+  sessionId: string;
+  agent: ActorIdentity;
+  repository: RepositoryContext;
+  projectId?: string;
+  taskId?: string;
+  attemptId?: string;
+  summary?: string;
+  details?: Record<string, unknown>;
+  status?: EvidenceStatus;
+  occurredAt?: string;
+  recordedAt: string;
+}
+
 export interface RepositoryContext {
   root: string;
   remote?: string;
