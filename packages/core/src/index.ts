@@ -11,7 +11,17 @@
 
 // Re-export types from shared
 export type {
+  ActorIdentity,
   Brand,
+  ContinuityAttempt,
+  ContinuityEvidence,
+  ContinuityHandoff,
+  ContinuityTask,
+  ContinuityStatus,
+  EvidenceAuthority,
+  EvidenceKind,
+  EvidenceSource,
+  EvidenceStatus,
   // Fuse types
   ContextSource,
   EmbeddingProviderConfig,
@@ -33,6 +43,7 @@ export type {
   MemoryType,
   MemoryWithEmbedding,
   Repository,
+  RepositoryContext,
   // Generic Patterns
   Result,
   // Context routing types
@@ -45,6 +56,20 @@ export type {
 } from '@ecuabyte/cortex-shared';
 // Project context utilities
 export { clearProjectCache, getProjectId, getProjectName } from './context';
+// Engineering continuity and handoff state
+export {
+  ContinuityStore,
+  type CaptureEvidenceInput,
+  type ContinuityStoreOptions,
+  type CreateHandoffInput,
+  type DetectInput,
+  type DetectResult,
+  type ResumeInput,
+  type ResumeResult,
+  type StartTaskInput,
+  type VerifyInput,
+} from './continuity';
+export { renderContinuityHandoffMarkdown } from './continuity-markdown';
 // ctx/embed
 export {
   cosineSimilarity,

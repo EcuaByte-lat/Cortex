@@ -12,6 +12,13 @@ export const TOOL_NAMES = {
   WORKFLOW: 'cortex_workflow',
   CONSTITUTION: 'cortex_constitution',
   THINK: 'cortex_think',
+  START: 'cortex_start',
+  STATUS: 'cortex_status',
+  CAPTURE: 'cortex_capture',
+  HANDOFF: 'cortex_handoff',
+  RESUME: 'cortex_resume',
+  VERIFY: 'cortex_verify',
+  DETECT: 'cortex_detect',
 } as const;
 
 export const MEMORY_TYPES = {

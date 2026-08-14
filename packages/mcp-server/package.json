@@ -8,7 +8,7 @@
   },
   "main": "./dist/mcp-server.js",
   "scripts": {
-    "build": "bun build src/mcp-server.ts --outdir dist --target bun --format esm && echo '#!/usr/bin/env bun' | cat - dist/mcp-server.js > dist/temp.js && mv dist/temp.js dist/mcp-server.js",
+    "build": "bun build src/mcp-server.ts --outdir dist --target bun --format esm",
     "dev": "bun run --watch src/mcp-server.ts",
     "start": "bun run dist/mcp-server.js",
     "typecheck": "bunx tsc --noEmit",
@@ -34,6 +34,6 @@
   },
   "dependencies": {
     "@ecuabyte/cortex-core": "workspace:^",
-    "@modelcontextprotocol/sdk": "^1.0.4"
+    "@modelcontextprotocol/sdk": "^1.30.0"
   }
 }

@@ -3,15 +3,19 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import {
   createEmbeddingProvider,
+  ContinuityStore,
+  renderContinuityHandoffMarkdown,
   type Memory,
   MemoryStore,
   type SemanticSearchResult,
 } from '@ecuabyte/cortex-core';
 import { MEMORY_TYPES } from '@ecuabyte/cortex-shared';
 import { Command } from 'commander';
+import { deriveProjectId, getRepositoryContext } from './continuity.js';
 
 const program = new Command();
 const store = new MemoryStore();
+const continuityStore = new ContinuityStore();
 
 // First-run auto-configuration
 (async () => {
@@ -557,6 +561,135 @@ program
     console.log('\n🎉 Setup complete!\n');
     console.log('Your AI assistants can now access project context via Cortex.\n');
     console.log('Try asking your AI: "What do you remember about this project?"\n');
+  });
+
+// Engineering continuity commands. These emit JSON so any agent can consume
+// the same state without depending on a provider-specific session format.
+program
+  .command('start <objective>')
+  .description('Start a durable task and agent attempt for the current repository')
+  .option('--acceptance <criterion>', 'Acceptance criterion (repeatable)', (value, previous: string[]) => [
+    ...previous,
+    value,
+  ], [])
+  .option('--agent <harness>', 'Agent or harness name', 'cortex-cli')
+  .option('--model <model>', 'Model name')
+  .option('--version <version>', 'Agent or harness version')
+  .option('--session <sessionId>', 'Provider session identifier')
+  .option('--task-id <taskId>', 'Reuse an explicit task identifier')
+  .option('--attempt-id <attemptId>', 'Reuse an explicit attempt identifier')
+  .action(async (objective, options) => {
+    const repository = getRepositoryContext();
+    const result = await continuityStore.startTask({
+      projectId: deriveProjectId(repository),
+      objective,
+      acceptanceCriteria: options.acceptance,
+      repository,
+      actor: {
+        harness: options.agent,
+        ...(options.model ? { model: options.model } : {}),
+        ...(options.version ? { version: options.version } : {}),
+        ...(options.session ? { sessionId: options.session } : {}),
+      },
+      ...(options.taskId ? { taskId: options.taskId } : {}),
+      ...(options.attemptId ? { attemptId: options.attemptId } : {}),
+    });
+    console.log(JSON.stringify(result, null, 2));
+  });
+
+program
+  .command('status [taskId]')
+  .description('Show the current task, attempt, handoff, and evidence')
+  .action(async (taskId) => {
+    const result = await continuityStore.resume({ taskId });
+    console.log(JSON.stringify(result, null, 2));
+  });
+
+program
+  .command('resume [taskId]')
+  .description('Resume the latest task or an explicit task')
+  .action(async (taskId) => {
+    const result = await continuityStore.resume({ taskId });
+    console.log(JSON.stringify(result, null, 2));
+  });
+
+program
+  .command('capture')
+  .description('Record evidence from the current agent attempt')
+  .requiredOption('--task <taskId>', 'Task identifier')
+  .requiredOption('--attempt <attemptId>', 'Attempt identifier')
+  .requiredOption('--kind <kind>', 'Evidence kind')
+  .requiredOption('--summary <summary>', 'Short evidence summary')
+  .requiredOption('--source <source>', 'Evidence source')
+  .option('--authority <authority>', 'Evidence authority', 'observed')
+  .option('--status <status>', 'Evidence status', 'current')
+  .option('--details <json>', 'Evidence details as JSON')
+  .action(async (options) => {
+    const details = options.details ? JSON.parse(options.details) as Record<string, unknown> : undefined;
+    const result = await continuityStore.capture({
+      taskId: options.task,
+      attemptId: options.attempt,
+      kind: options.kind,
+      summary: options.summary,
+      source: options.source,
+      authority: options.authority,
+      status: options.status,
+      ...(details ? { details } : {}),
+    });
+    console.log(JSON.stringify(result, null, 2));
+  });
+
+program
+  .command('handoff')
+  .description('Create a portable handoff before switching agents')
+  .requiredOption('--task <taskId>', 'Task identifier')
+  .requiredOption('--attempt <attemptId>', 'Attempt identifier')
+  .option('--summary <summary>', 'Handoff summary')
+  .option('--next <action>', 'Next action (repeatable)', (value, previous: string[]) => [
+    ...previous,
+    value,
+  ], [])
+  .action(async (options) => {
+    const result = await continuityStore.createHandoff({
+      taskId: options.task,
+      attemptId: options.attempt,
+      ...(options.summary ? { summary: options.summary } : {}),
+      nextActions: options.next,
+    });
+    console.log(JSON.stringify({ handoff: result, markdown: renderContinuityHandoffMarkdown(result) }, null, 2));
+  });
+
+program
+  .command('verify')
+  .description('Record a verification backed by a tool, test, Git, CI, or human')
+  .requiredOption('--task <taskId>', 'Task identifier')
+  .requiredOption('--attempt <attemptId>', 'Attempt identifier')
+  .requiredOption('--summary <summary>', 'What was verified')
+  .requiredOption('--source <source>', 'Verification source')
+  .option('--status <status>', 'Verification status', 'current')
+  .option('--details <json>', 'Verification details as JSON')
+  .action(async (options) => {
+    const details = options.details ? JSON.parse(options.details) as Record<string, unknown> : undefined;
+    const result = await continuityStore.verify({
+      taskId: options.task,
+      attemptId: options.attempt,
+      summary: options.summary,
+      source: options.source,
+      status: options.status,
+      ...(details ? { details } : {}),
+    });
+    console.log(JSON.stringify(result, null, 2));
+  });
+
+program
+  .command('detect <taskId>')
+  .description('Detect branch, commit, or remote drift before continuing')
+  .action(async (taskId) => {
+    const result = await continuityStore.detect({
+      taskId,
+      repository: getRepositoryContext(),
+    });
+    console.log(JSON.stringify(result, null, 2));
   });
 
 program.parse();

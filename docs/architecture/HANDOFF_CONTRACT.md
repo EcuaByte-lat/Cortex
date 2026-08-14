@@ -1,6 +1,6 @@
 # Handoff contract
 
-**Status:** Planned domain contract
+**Status:** Implemented baseline; evolving contract
 **Version:** 0.1 draft
 **Updated:** 2026-08-14
 
@@ -83,7 +83,7 @@ New Git state, test results, explicit human decisions, or contradictory evidence
 start -> capture -> handoff -> resume -> verify -> supersede/archive
 ```
 
-These lifecycle commands are roadmap targets until the corresponding code, fixtures, and integration tests exist.
+The local core, CLI, and MCP server implement the initial lifecycle. Concurrent access, import/export rebuilding, and provider-specific automation remain roadmap work.
 
 ## Non-goals
 

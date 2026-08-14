@@ -1,10 +1,12 @@
 import {
   ContextGuard,
   ContextRouter,
+  ContinuityStore,
   createEmbeddingProvider,
   type Memory,
   MemoryStore,
   ProjectScanner,
+  renderContinuityHandoffMarkdown,
 } from '@ecuabyte/cortex-core';
 import {
   MEMORY_TYPES,
@@ -15,6 +17,7 @@ import {
 } from '@ecuabyte/cortex-shared';
 
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { createContinuityToolDefinitions } from './continuity-tools';
 
 // Helper to format success response using the generic ToolResponse pattern
 function formatOutput(text: string): CallToolResult {
@@ -33,6 +36,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
 const store = new MemoryStore();
+const continuityStore = new ContinuityStore();
 const router = new ContextRouter(store);
 const guard = new ContextGuard();
 
@@ -244,6 +248,8 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
+    instructions:
+      'Cortex preserves verified engineering continuity. Start or resume a task with cortex_start or cortex_resume, capture high-signal evidence with cortex_capture, create a handoff before switching agents, and verify claims with cortex_verify. MCP sessions are not task state: always use explicit taskId and attemptId. Treat agent summaries as unverified until supported by Git, tests, CI, tools, files, or human approval.',
   }
 );
 
@@ -560,13 +566,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['thought'],
         },
       },
+      ...createContinuityToolDefinitions(),
     ],
   };
 });
 
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
+  const { name } = request.params;
+  const args = request.params.arguments as Record<string, unknown> | undefined;
 
   try {
     switch (name) {
@@ -972,6 +980,83 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             },
           ],
         };
+      }
+
+      case TOOL_NAMES.START: {
+        if (!args) throw new Error('Missing arguments');
+        const started = await continuityStore.startTask({
+          projectId: args['projectId'] as string,
+          objective: args['objective'] as string,
+          acceptanceCriteria: args['acceptanceCriteria'] as string[] | undefined,
+          repository: args['repository'] as Parameters<ContinuityStore['startTask']>[0]['repository'],
+          actor: args['actor'] as Parameters<ContinuityStore['startTask']>[0]['actor'],
+          taskId: args['taskId'] as string | undefined,
+          attemptId: args['attemptId'] as string | undefined,
+        });
+        return formatOutput(JSON.stringify(started, null, 2));
+      }
+
+      case TOOL_NAMES.STATUS: {
+        const result = await continuityStore.resume({ taskId: args?.['taskId'] as string | undefined });
+        return formatOutput(
+          JSON.stringify({ task: result.task, attempt: result.attempt, handoff: result.handoff }, null, 2)
+        );
+      }
+
+      case TOOL_NAMES.CAPTURE: {
+        if (!args) throw new Error('Missing arguments');
+        const evidence = await continuityStore.capture({
+          taskId: args['taskId'] as string,
+          attemptId: args['attemptId'] as string,
+          kind: args['kind'] as Parameters<ContinuityStore['capture']>[0]['kind'],
+          summary: args['summary'] as string,
+          details: args['details'] as Record<string, unknown> | undefined,
+          source: args['source'] as Parameters<ContinuityStore['capture']>[0]['source'],
+          authority: args['authority'] as Parameters<ContinuityStore['capture']>[0]['authority'],
+          status: args['status'] as Parameters<ContinuityStore['capture']>[0]['status'],
+          observedAt: args['observedAt'] as string | undefined,
+        });
+        return formatOutput(JSON.stringify(evidence, null, 2));
+      }
+
+      case TOOL_NAMES.HANDOFF: {
+        if (!args) throw new Error('Missing arguments');
+        const handoff = await continuityStore.createHandoff({
+          taskId: args['taskId'] as string,
+          attemptId: args['attemptId'] as string,
+          summary: args['summary'] as string | undefined,
+          nextActions: args['nextActions'] as string[] | undefined,
+        });
+        return formatOutput(
+          JSON.stringify({ handoff, markdown: renderContinuityHandoffMarkdown(handoff) }, null, 2)
+        );
+      }
+
+      case TOOL_NAMES.RESUME: {
+        const result = await continuityStore.resume({ taskId: args?.['taskId'] as string | undefined });
+        return formatOutput(JSON.stringify(result, null, 2));
+      }
+
+      case TOOL_NAMES.VERIFY: {
+        if (!args) throw new Error('Missing arguments');
+        const verification = await continuityStore.verify({
+          taskId: args['taskId'] as string,
+          attemptId: args['attemptId'] as string,
+          summary: args['summary'] as string,
+          source: args['source'] as Parameters<ContinuityStore['verify']>[0]['source'],
+          details: args['details'] as Record<string, unknown> | undefined,
+          status: args['status'] as Parameters<ContinuityStore['verify']>[0]['status'],
+        });
+        return formatOutput(JSON.stringify(verification, null, 2));
+      }
+
+      case TOOL_NAMES.DETECT: {
+        if (!args) throw new Error('Missing arguments');
+        const detection = await continuityStore.detect({
+          taskId: args['taskId'] as string,
+          repository: args['repository'] as Parameters<ContinuityStore['detect']>[0]['repository'],
+        });
+        return formatOutput(JSON.stringify(detection, null, 2));
       }
 
       default:

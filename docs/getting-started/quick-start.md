@@ -1,6 +1,6 @@
 # Quick Start
 
-Get the current Cortex foundation running in under 5 minutes. The verified handoff lifecycle is the product direction; the commands marked as planned are not yet implemented.
+Get the current Cortex foundation running in under 5 minutes. Cortex stores a provider-neutral task, evidence, and handoff record so another agent can continue the work.
 
 ## Option 1: VS Code Extension (Recommended)
 
@@ -18,7 +18,7 @@ Get the current Cortex foundation running in under 5 minutes. The verified hando
 
 4. **Connect an MCP client**
    - Configure Cortex using [Universal setup](../UNIVERSAL_SETUP.md)
-   - Treat the current integration as context transport; reliable capture, handoff, resume, and verification are planned capabilities
+   - Use the MCP tools `cortex_start`, `cortex_capture`, `cortex_handoff`, `cortex_resume`, `cortex_detect`, and `cortex_verify` for the continuity lifecycle
 
 ## Option 2: CLI
 
@@ -43,6 +43,25 @@ bun --cwd packages/cli run dev search "database"
 
 # Retrieve context for a task
 bun --cwd packages/cli run dev context "setting up database migrations"
+
+# Start a durable task for the current repository
+bun --cwd packages/cli run dev start "Implement database migrations" \
+  --acceptance "Migration tests pass" \
+  --agent codex
+
+# The command returns taskId and attemptId. Reuse them while working.
+bun --cwd packages/cli run dev capture \
+  --task <taskId> --attempt <attemptId> \
+  --kind decision --summary "Keep migrations reversible" --source human
+
+# Before changing agents, export JSON and Markdown in one response
+bun --cwd packages/cli run dev handoff \
+  --task <taskId> --attempt <attemptId> \
+  --next "Run the migration test suite"
+
+# The next agent can retrieve and check freshness
+bun --cwd packages/cli run dev resume <taskId>
+bun --cwd packages/cli run dev detect <taskId>
 ```
 
 ## Option 3: MCP Server
