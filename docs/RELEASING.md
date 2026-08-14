@@ -36,9 +36,11 @@ published from this public repository.
 3. The `Release` job publishes npm packages in dependency order.
 4. The job compares the extension version with VS Code Marketplace and Open VSX,
    then publishes `cortex-vscode` only when a newer version is present.
+5. The job creates the matching GitHub Release (`cortex-vscode@<version>`) with
+   the generated `.vsix` attached, unless that release already exists.
 
 The VS Code extension is intentionally not published to npm. Its distribution
-channels are VS Code Marketplace and Open VSX. Marketplace publication uses a
+channels are VS Code Marketplace, Open VSX, and GitHub Releases. Marketplace publication uses a
 GitHub Actions `VSCE_PAT` secret with the minimum Azure DevOps scope
 `Marketplace (Manage)`.
 
