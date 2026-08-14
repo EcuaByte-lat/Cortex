@@ -38,7 +38,18 @@ published from this public repository.
    then publishes `cortex-vscode` only when a newer version is present.
 
 The VS Code extension is intentionally not published to npm. Its distribution
-channels are VS Code Marketplace and Open VSX.
+channels are VS Code Marketplace and Open VSX. Marketplace publication uses
+`@vscode/vsce publish --oidc`, which exchanges the GitHub Actions OIDC token
+for a short-lived Marketplace credential and does not require `VSCE_PAT`.
+
+Configure a Trusted Publishing policy for the `EcuaByte` publisher in the
+Visual Studio Marketplace, matching this repository and workflow:
+
+- Repository: `EcuaByte-lat/Cortex`
+- Workflow: `unified.yml`
+
+The workflow already requests `id-token: write`. Do not add a Marketplace PAT
+or an Azure client secret to the repository.
 
 After configuring Trusted Publishing, rerun a failed release job from GitHub
 Actions. Do not add an npm token to the repository or commit a local `.npmrc`.

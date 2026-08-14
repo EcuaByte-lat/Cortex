@@ -183,8 +183,6 @@ jobs:
       # VS Code Extension Publishing (version-gated against Marketplace)
       # ─────────────────────────────────────────────────────────────────────────
       - name: Publish VS Code Extension
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           EXTENSION_VERSION=$(node -p "require('./packages/vscode-extension/package.json').version")
           MARKETPLACE_VERSION=$(curl -fsSL -X POST \
@@ -196,7 +194,7 @@ jobs:
           if [[ "$EXTENSION_VERSION" != "$MARKETPLACE_VERSION" ]]; then
             echo "📦 Publishing VS Code Extension..."
             cd packages/vscode-extension
-            bunx vsce publish --no-dependencies -p $VSCE_PAT
+            bunx vsce publish --no-dependencies --oidc
             echo "✅ VS Code Extension published successfully"
           else
             echo "ℹ️ VS Code Marketplace already has $EXTENSION_VERSION, skipping."
