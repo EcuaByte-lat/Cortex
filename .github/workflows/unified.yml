@@ -86,7 +86,7 @@ jobs:
 
       - name: Run Core & Extension tests (with coverage)
         if: matrix.task == 'test'
-        run: bun test packages/core packages/vscode-extension packages/shared packages/mcp-server --reporter=junit --reporter-outfile=reports/junit.xml --coverage --coverage-reporter=lcov --coverage-dir=reports/coverage
+        run: bun test packages/core packages/vscode-extension packages/shared packages/mcp-server scripts/release-workflow.test.ts --reporter=junit --reporter-outfile=reports/junit.xml --coverage --coverage-reporter=lcov --coverage-dir=reports/coverage
 
       # CLI tests separated for isolation
       - name: Run CLI tests (isolated)
@@ -219,6 +219,33 @@ jobs:
           else
              echo "ℹ️ Open VSX already has $EXTENSION_VERSION, skipping."
           fi
+
+      # GitHub Releases are a separate distribution channel from Marketplace
+      # and Open VSX. Keep one immutable release per extension version and
+      # attach the VSIX users can install manually.
+      - name: Create GitHub Release for VS Code Extension
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          EXTENSION_VERSION=$(node -p "require('./packages/vscode-extension/package.json').version")
+          RELEASE_TAG="cortex-vscode@${EXTENSION_VERSION}"
+          VSIX_PATH="$RUNNER_TEMP/cortex-vscode-${EXTENSION_VERSION}.vsix"
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "ℹ️ GitHub Release $RELEASE_TAG already exists, skipping."
+            exit 0
+          fi
+
+          cd packages/vscode-extension
+          bunx @vscode/vsce package --no-dependencies --out "$VSIX_PATH"
+          test -f "$VSIX_PATH"
+
+          gh release create "$RELEASE_TAG" "$VSIX_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Cortex VS Code ${EXTENSION_VERSION}" \
+            --generate-notes \
+            --latest
 
   # ═══════════════════════════════════════════════════════════════════════════
   # CODEQL SECURITY ANALYSIS - Only on main branch pushes
