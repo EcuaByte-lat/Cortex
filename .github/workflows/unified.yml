@@ -194,7 +194,7 @@ jobs:
           if [[ "$EXTENSION_VERSION" != "$MARKETPLACE_VERSION" ]]; then
             echo "📦 Publishing VS Code Extension..."
             cd packages/vscode-extension
-            bunx vsce publish --no-dependencies --oidc
+            bunx @vscode/vsce publish --no-dependencies --oidc
             echo "✅ VS Code Extension published successfully"
           else
             echo "ℹ️ VS Code Marketplace already has $EXTENSION_VERSION, skipping."
