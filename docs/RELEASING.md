@@ -44,17 +44,20 @@ Microsoft Entra workload identity federation with
 Azure DevOps access token through `azure/login@v2`; it does not require
 `VSCE_PAT`.
 
-Create a user-assigned managed identity in Azure and configure a federated
-credential for this GitHub Actions subject:
+If the Azure tenant has a subscription, a user-assigned managed identity can
+be used. Without a subscription, create a Microsoft Entra app registration
+and its service principal instead, then configure a federated credential for
+this GitHub Actions subject:
 
 - Issuer: `https://token.actions.githubusercontent.com/`
 - Subject: `repo:EcuaByte-lat/Cortex:ref:refs/heads/main`
 - Audience: `api://AzureADTokenExchange`
 
-Authorize that identity in the `EcuaByte` Visual Studio Marketplace publisher
-with the Contributor role. Then add these GitHub Actions secrets:
+Authorize the app's service principal in the `EcuaByte` Visual Studio
+Marketplace publisher with the Contributor role. Then add these GitHub Actions
+secrets:
 
-- `AZURE_CLIENT_ID`: managed identity client ID
+- `AZURE_CLIENT_ID`: Application (client) ID
 - `AZURE_TENANT_ID`: Microsoft Entra tenant ID
 
 The workflow already requests `id-token: write` and uses
