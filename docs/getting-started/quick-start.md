@@ -64,6 +64,35 @@ bun --cwd packages/cli run dev resume <taskId>
 bun --cwd packages/cli run dev detect <taskId>
 ```
 
+## Agent Bridge (Codex and OpenCode)
+
+To capture lifecycle events automatically in a repository, install the native
+integrations from the repository root:
+
+```bash
+cortex install --project .
+```
+
+This writes project-scoped Codex hooks to `.codex/hooks.json` and an OpenCode
+plugin to `.opencode/plugins/cortex.ts`. Both adapters send normalized events
+to the same local ContinuityStore used by the CLI and MCP server. The bridge
+deduplicates retries and redacts sensitive values before evidence is persisted.
+The generated integrations invoke the `cortex` executable with Bun, which is
+the runtime required by Cortex's local SQLite layer.
+
+For a smoke test without an installed agent, send one normalized provider
+payload through stdin:
+
+```bash
+export CORTEX_CONTINUITY_DB="$PWD/.cortex/bridge-smoke.db"
+printf '%s\n' '{"hook_event_name":"UserPromptSubmit","session_id":"demo-session","prompt":"Implement the login flow","cwd":"'"$PWD"'"}' \
+  | cortex bridge ingest --provider codex
+```
+
+The command returns JSON with `accepted`, `duplicate`, `task`, `attempt`, and
+any captured `evidence` or `handoff`. Replaying the same event is safe and
+returns `duplicate: true`.
+
 ## Option 3: MCP Server
 
 For Claude Desktop, Cursor, or other MCP clients:

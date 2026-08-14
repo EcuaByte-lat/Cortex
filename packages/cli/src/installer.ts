@@ -21,7 +21,7 @@ export interface EditorConfig {
   globalPath: string;
   projectPath?: string;
   configKey: string;
-  format: 'mcp-servers' | 'cascade' | 'context-servers' | 'claude';
+  format: 'mcp-servers' | 'cascade' | 'context-servers' | 'claude' | 'gemini';
   installed?: boolean;
 }
 
@@ -809,6 +809,128 @@ export function installClaudeHooks(
   }
 }
 
+export function installCodexHooks(
+  options: { global?: boolean; projectPath?: string } = { global: true }
+): { success: boolean; message: string; path: string } {
+  const configPath = options.global
+    ? join(HOME, '.codex', 'hooks.json')
+    : options.projectPath
+      ? join(options.projectPath, '.codex', 'hooks.json')
+      : join(HOME, '.codex', 'hooks.json');
+
+  try {
+    const config = readConfigFile(configPath);
+    const hooks = config as Record<string, unknown>;
+    const bridgeCommand = 'cortex bridge ingest --provider codex';
+    const events: Array<{ name: string; matcher?: string }> = [
+      { name: 'SessionStart' },
+      { name: 'UserPromptSubmit' },
+      { name: 'PostToolUse', matcher: 'Bash|apply_patch|Edit|Write' },
+      { name: 'PostToolUseFailure', matcher: 'Bash|apply_patch|Edit|Write' },
+      { name: 'PreCompact' },
+      { name: 'PostCompact' },
+      { name: 'SessionEnd' },
+    ];
+
+    for (const event of events) {
+      const entries = Array.isArray(hooks[event.name]) ? (hooks[event.name] as unknown[]) : [];
+      const hasBridge = entries.some((entry) => JSON.stringify(entry).includes(bridgeCommand));
+      if (!hasBridge) {
+        entries.push({
+          ...(event.matcher ? { matcher: event.matcher } : {}),
+          hooks: [
+            {
+              type: 'command',
+              command: bridgeCommand,
+              ...(event.name === 'SessionEnd' ? { timeout: 3 } : {}),
+            },
+          ],
+        });
+      }
+      hooks[event.name] = entries;
+    }
+
+    writeConfigFile(configPath, config);
+    return { success: true, message: '✅ Codex Agent Bridge hooks configured', path: configPath };
+  } catch (error) {
+    return {
+      success: false,
+      message: `❌ Failed to configure Codex hooks: ${error instanceof Error ? error.message : String(error)}`,
+      path: configPath,
+    };
+  }
+}
+
+export function installOpenCodePlugin(projectPath: string): {
+  success: boolean;
+  message: string;
+  path: string;
+} {
+  const pluginPath = join(projectPath, '.opencode', 'plugins', 'cortex.ts');
+  const content = `import type { Plugin } from '@opencode-ai/plugin';
+
+const captureTypes = new Set([
+  'session.created',
+  'session.idle',
+  'session.compacted',
+  'session.deleted',
+  'file.edited',
+  'command.executed',
+  'tui.prompt.append',
+]);
+
+async function emit(event: Record<string, unknown>, directory: string) {
+  const process = Bun.spawn(['cortex', 'bridge', 'ingest', '--provider', 'opencode'], {
+    stdin: 'pipe',
+    stdout: 'ignore',
+    stderr: 'ignore',
+  });
+  await process.stdin.write(JSON.stringify({ ...event, cwd: directory, directory }));
+  process.stdin.end();
+  await process.exited;
+}
+
+export const CortexAgentBridge: Plugin = async ({ directory }) => ({
+  event: async ({ event }) => {
+    if (captureTypes.has(event.type)) {
+      await emit(event as unknown as Record<string, unknown>, directory);
+    }
+  },
+  'tool.execute.after': async (input, output) => {
+    const toolInput = input as unknown as Record<string, unknown>;
+    await emit(
+      {
+        type: 'tool.execute.after',
+        properties: {
+          id: toolInput['callID'] ?? toolInput['callId'],
+          sessionID: toolInput['sessionID'] ?? toolInput['sessionId'],
+          tool: toolInput['tool'],
+          input: toolInput,
+          output,
+        },
+      },
+      directory
+    );
+  },
+});
+`;
+
+  try {
+    writeFileSync(pluginPath, content);
+    return {
+      success: true,
+      message: '✅ OpenCode Agent Bridge plugin configured',
+      path: pluginPath,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `❌ Failed to configure OpenCode plugin: ${error instanceof Error ? error.message : String(error)}`,
+      path: pluginPath,
+    };
+  }
+}
+
 // Full installation for all detected editors
 export function installAll(
   options: { global?: boolean; projectPath?: string } = { global: true }
@@ -859,6 +981,12 @@ export function installAll(
         path: result.path,
       });
     }
+
+    const codexResult = installCodexHooks({ projectPath: options.projectPath, global: false });
+    results.push({ editor: 'Codex hooks', ...codexResult });
+
+    const openCodeResult = installOpenCodePlugin(options.projectPath);
+    results.push({ editor: 'OpenCode plugin', ...openCodeResult });
   }
 
   const success = results.filter((r) => r.success).length;
@@ -919,6 +1047,8 @@ export default {
   installCursorRules,
   installUniversalRules,
   installClaudeHooks,
+  installCodexHooks,
+  installOpenCodePlugin,
   installAll,
   getEditorConfigs,
   ensureFirstRun,

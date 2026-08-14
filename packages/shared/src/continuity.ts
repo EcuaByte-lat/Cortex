@@ -18,11 +18,50 @@ export type EvidenceAuthority = 'observed' | 'verified' | 'approved' | 'inferred
 
 export type EvidenceStatus = 'current' | 'stale' | 'superseded' | 'failed' | 'unverified';
 
+export type AgentEventType =
+  | 'session.started'
+  | 'prompt.submitted'
+  | 'tool.completed'
+  | 'tool.failed'
+  | 'file.changed'
+  | 'command.completed'
+  | 'compaction.started'
+  | 'session.idle'
+  | 'session.ended';
+
 export interface ActorIdentity {
   harness: string;
   model?: string;
   version?: string;
   sessionId?: string;
+}
+
+export interface AgentEvent {
+  eventId: string;
+  type: AgentEventType;
+  sessionId: string;
+  agent: ActorIdentity;
+  repository: RepositoryContext;
+  projectId?: string;
+  taskId?: string;
+  attemptId?: string;
+  objective?: string;
+  summary?: string;
+  details?: Record<string, unknown>;
+  evidenceKind?: EvidenceKind;
+  source?: EvidenceSource;
+  authority?: EvidenceAuthority;
+  status?: EvidenceStatus;
+  occurredAt?: string;
+}
+
+export interface AgentBridgeResult {
+  accepted: boolean;
+  duplicate: boolean;
+  task: ContinuityTask | null;
+  attempt: ContinuityAttempt | null;
+  evidence?: ContinuityEvidence;
+  handoff?: ContinuityHandoff;
 }
 
 export interface RepositoryContext {

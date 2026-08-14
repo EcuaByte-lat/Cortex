@@ -12,20 +12,23 @@
 // Re-export types from shared
 export type {
   ActorIdentity,
+  AgentBridgeResult,
+  AgentEvent,
+  AgentEventType,
   Brand,
+  // Fuse types
+  ContextSource,
   ContinuityAttempt,
   ContinuityEvidence,
   ContinuityHandoff,
-  ContinuityTask,
   ContinuityStatus,
+  ContinuityTask,
+  EmbeddingProviderConfig,
+  Entity,
   EvidenceAuthority,
   EvidenceKind,
   EvidenceSource,
   EvidenceStatus,
-  // Fuse types
-  ContextSource,
-  EmbeddingProviderConfig,
-  Entity,
   FuseOptions,
   FuseResult,
   // Guard types
@@ -54,12 +57,13 @@ export type {
   Service,
   ToolResponse,
 } from '@ecuabyte/cortex-shared';
+export { AgentBridge, type AgentBridgeOptions } from './agent-bridge';
 // Project context utilities
 export { clearProjectCache, getProjectId, getProjectName } from './context';
 // Engineering continuity and handoff state
 export {
-  ContinuityStore,
   type CaptureEvidenceInput,
+  ContinuityStore,
   type ContinuityStoreOptions,
   type CreateHandoffInput,
   type DetectInput,

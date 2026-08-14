@@ -5,6 +5,7 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
   type ActorIdentity,
+  type AgentEvent,
   CONTINUITY_SCHEMA_VERSION,
   type ContinuityAttempt,
   type ContinuityEvidence,
@@ -62,6 +63,7 @@ export interface VerifyInput {
 
 export interface ResumeInput {
   taskId?: string;
+  repository?: RepositoryContext;
 }
 
 export interface ResumeResult {
@@ -122,6 +124,14 @@ interface HandoffRow {
   payload: string;
 }
 
+export interface EventClaimInput {
+  eventId: string;
+  harness: string;
+  sessionId: string;
+  eventType: AgentEvent['type'];
+  recordedAt: string;
+}
+
 function createId(prefix: string): string {
   return `${prefix}_${randomUUID()}`;
 }
@@ -174,13 +184,17 @@ export class ContinuityStore {
   private readonly db: Database;
 
   constructor(options: ContinuityStoreOptions = {}) {
-    const dbPath = options.dbPath ?? join(homedir(), '.cortex', 'continuity.db');
+    const dbPath =
+      options.dbPath ??
+      process.env['CORTEX_CONTINUITY_DB'] ??
+      join(homedir(), '.cortex', 'continuity.db');
     if (dbPath !== ':memory:') mkdirSync(dirname(dbPath), { recursive: true });
 
     this.db = new Database(dbPath);
     this.db.exec(`
       PRAGMA journal_mode = WAL;
       PRAGMA busy_timeout = 5000;
+      PRAGMA foreign_keys = ON;
 
       CREATE TABLE IF NOT EXISTS continuity_tasks (
         id TEXT PRIMARY KEY,
@@ -227,6 +241,15 @@ export class ContinuityStore {
         created_at TEXT NOT NULL,
         FOREIGN KEY (task_id) REFERENCES continuity_tasks(id),
         FOREIGN KEY (attempt_id) REFERENCES continuity_attempts(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS continuity_events (
+        event_id TEXT NOT NULL,
+        harness TEXT NOT NULL,
+        session_id TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        recorded_at TEXT NOT NULL,
+        PRIMARY KEY (event_id, harness, session_id)
       );
 
       CREATE INDEX IF NOT EXISTS continuity_evidence_task_idx
@@ -295,6 +318,63 @@ export class ContinuityStore {
       );
 
     return { task, attempt };
+  }
+
+  async claimEvent(input: EventClaimInput): Promise<boolean> {
+    const result = this.db
+      .prepare(
+        `INSERT OR IGNORE INTO continuity_events
+          (event_id, harness, session_id, event_type, recorded_at)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(input.eventId, input.harness, input.sessionId, input.eventType, input.recordedAt);
+
+    return result.changes === 1;
+  }
+
+  async getTaskById(id: string): Promise<ContinuityTask | null> {
+    return this.getTask(id);
+  }
+
+  async getAttemptById(id: string): Promise<ContinuityAttempt | null> {
+    return this.getAttempt(id);
+  }
+
+  async findActiveTask(repository: RepositoryContext): Promise<ContinuityTask | null> {
+    const rows = this.db
+      .prepare(
+        `SELECT * FROM continuity_tasks
+         WHERE status IN ('in_progress', 'blocked')
+         ORDER BY updated_at DESC`
+      )
+      .all() as TaskRow[];
+
+    return rows.map(toTask).find((task) => repositoryMatches(task.repository, repository)) ?? null;
+  }
+
+  async findAttemptBySession(taskId: string, sessionId: string): Promise<ContinuityAttempt | null> {
+    const rows = this.db
+      .prepare(
+        `SELECT * FROM continuity_attempts
+         WHERE task_id = ? AND status = 'active'
+         ORDER BY started_at DESC`
+      )
+      .all(taskId) as AttemptRow[];
+
+    return rows.map(toAttempt).find((attempt) => attempt.actor.sessionId === sessionId) ?? null;
+  }
+
+  async endAttempt(attemptId: string): Promise<ContinuityAttempt | null> {
+    const endedAt = new Date().toISOString();
+    this.db
+      .prepare(
+        `UPDATE continuity_attempts
+         SET status = 'ended', ended_at = ?
+         WHERE id = ? AND status = 'active'`
+      )
+      .run(endedAt, attemptId);
+
+    return this.getAttempt(attemptId);
   }
 
   async capture(input: CaptureEvidenceInput): Promise<ContinuityEvidence> {
@@ -391,7 +471,11 @@ export class ContinuityStore {
   }
 
   async resume(input: ResumeInput): Promise<ResumeResult> {
-    const task = input.taskId ? this.getTask(input.taskId) : this.getLatestTask();
+    const task = input.taskId
+      ? this.getTask(input.taskId)
+      : input.repository
+        ? await this.findActiveTask(input.repository)
+        : this.getLatestTask();
     if (!task) return { task: null, attempt: null, handoff: null, evidence: [] };
 
     const attempt = this.getLatestAttempt(task.id);
@@ -476,4 +560,16 @@ export class ContinuityStore {
       .all(taskId) as EvidenceRow[];
     return rows.map(toEvidence);
   }
+}
+
+function repositoryMatches(expected: RepositoryContext, actual: RepositoryContext): boolean {
+  if (expected.remote && expected.remote !== actual.remote) return false;
+  if (expected.branch && expected.branch !== actual.branch) return false;
+  if (expected.worktree && expected.worktree !== actual.worktree) return false;
+
+  return Boolean(
+    (expected.remote && actual.remote) ||
+      (expected.worktree && actual.worktree) ||
+      expected.root === actual.root
+  );
 }
