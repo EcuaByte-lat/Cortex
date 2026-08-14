@@ -105,7 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
               } catch (fallbackError) {
                 console.error('Failed to run local install:', fallbackError);
                 vscode.window.showErrorMessage(
-                  `Failed to run global configuration: ${error.message || error}. Please run \`bunx @ecuabyte/cortex-cli install\` manually in your terminal.`
+                  `Failed to run global configuration: ${error instanceof Error ? error.message : error}. Please run \`bunx @ecuabyte/cortex-cli install\` manually in your terminal.`
                 );
               }
             }
@@ -199,21 +199,6 @@ export async function activate(context: vscode.ExtensionContext) {
         dashboardWebview.show(context);
       })
     );
-
-    // Register Webview Serializer for persistence
-    vscode.window.registerWebviewPanelSerializer('cortexAIScan', {
-      async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: unknown) {
-        dashboardWebview.attach(webviewPanel, context);
-      },
-    });
-
-    // Auto-show dashboard on activation if not already restored by serializer
-    // (Serializers run before activation completes usually, but we can check if panel is set)
-    // For now, keeping it proactive but safe.
-    if (!context.globalState.get('cortex.dashboardOpened')) {
-      dashboardWebview.show(context);
-      context.globalState.update('cortex.dashboardOpened', true);
-    }
 
     // Register commands
     console.log('[Cortex] Registering Commands...');
@@ -491,64 +476,82 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
     // Command to scan project with AI (intelligent analysis)
-    const startProjectAnalysis = async () => {
+    const startProjectAnalysis = async (mode: 'startup' | 'manual' = 'manual') => {
+      const interactive = mode === 'manual';
       try {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
-          vscode.window.showWarningMessage('No workspace folder open');
+          if (interactive) vscode.window.showWarningMessage('No workspace folder open');
           return;
         }
 
         const scanPath = workspaceFolder.uri.fsPath;
 
-        // Use existing dashboard webview
-        dashboardWebview.show(context);
-
-        // Clear any previous state to prevent duplication and show analyzing status
-        dashboardWebview.clearState();
-        dashboardWebview.setStatus('analyzing', 'Starting new analysis session...');
+        if (interactive) {
+          dashboardWebview.show(context);
+          dashboardWebview.clearState();
+          dashboardWebview.setStatus('analyzing', 'Starting new analysis session...');
+        }
 
         // Update tree status
         treeProvider.setAnalysisStatus('running');
 
-        await vscode.window.withProgress(
-          {
-            location: vscode.ProgressLocation.Notification,
-            title: 'Cortex: AI-powered scan...',
-            cancellable: true,
-          },
-          async (progress, token) => {
-            progress.report({ message: 'Analyzing with AI...' });
+        if (interactive)
+          await vscode.window.withProgress(
+            {
+              location: vscode.ProgressLocation.Notification,
+              title: 'Cortex: AI-powered scan...',
+              cancellable: true,
+            },
+            async (progress, token) => {
+              progress.report({ message: 'Analyzing with AI...' });
 
-            progress.report({ message: 'Analyzing with AI...' });
+              progress.report({ message: 'Analyzing with AI...' });
 
-            const { scanProjectWithAI } = await import('./aiScanner');
+              const { scanProjectWithAI } = await import('./aiScanner');
 
-            // Pass refresh callback for real-time tree updates
-            const result = await scanProjectWithAI(
-              scanPath,
-              token,
-              store,
-              dashboardWebview,
-              (_memory, count) => {
-                progress.report({ message: `Saved ${count} memories...` });
-              },
-              () => treeProvider.refresh(),
-              context.secrets // For Gemini API BYOK
-            );
+              // Pass refresh callback for real-time tree updates
+              const result = await scanProjectWithAI(
+                scanPath,
+                token,
+                store,
+                dashboardWebview,
+                (_memory, count) => {
+                  progress.report({ message: `Saved ${count} memories...` });
+                },
+                () => treeProvider.refresh(),
+                context.secrets, // For Gemini API BYOK
+                { mode, accessInformation: context.languageModelAccessInformation }
+              );
 
-            // Final refresh to ensure tree is up-to-date and status is idle
-            treeProvider.setAnalysisStatus('idle');
+              // Final refresh to ensure tree is up-to-date and status is idle
+              treeProvider.setAnalysisStatus('idle');
 
-            vscode.window.showInformationMessage(
-              `✓ AI scan complete! Analyzed ${result.filesAnalyzed} files, saved ${result.savedCount} memories in real-time.`
-            );
-          }
-        );
-      } catch (error) {
-        dashboardWebview.setStatus('error', `Scan failed: ${error}`);
+              vscode.window.showInformationMessage(
+                `✓ AI scan complete! Analyzed ${result.filesAnalyzed} files, saved ${result.savedCount} memories in real-time.`
+              );
+            }
+          );
+        else {
+          const { scanProjectWithAI } = await import('./aiScanner');
+          await scanProjectWithAI(
+            scanPath,
+            new vscode.CancellationTokenSource().token,
+            store,
+            dashboardWebview,
+            undefined,
+            () => treeProvider.refresh(),
+            context.secrets,
+            { mode: 'startup', accessInformation: context.languageModelAccessInformation }
+          );
+        }
+        dashboardWebview.hydrate();
         treeProvider.setAnalysisStatus('idle');
-        vscode.window.showErrorMessage(`Error scanning project: ${error}`);
+      } catch (error) {
+        if (interactive) dashboardWebview.setStatus('error', `Scan failed: ${error}`);
+        treeProvider.setAnalysisStatus('idle');
+        if (interactive) vscode.window.showErrorMessage(`Error scanning project: ${error}`);
+        else console.warn('[Cortex] Silent startup scan skipped:', error);
       }
     };
 
@@ -585,7 +588,7 @@ export async function activate(context: vscode.ExtensionContext) {
             console.log(
               `[Cortex] Dashboard empty but DB has ${stats.total} memories. Loading initial batch...`
             );
-            const memories = await store.list({ limit: 50 });
+            const memories = await store.list({});
             for (const m of memories.reverse()) {
               dashboardWebview.addMemory({ ...m, tags: m.tags || [] });
             }
@@ -704,18 +707,18 @@ export async function activate(context: vscode.ExtensionContext) {
           if (payload.area) {
             // Filter by tag matching the area name (slugified as in aiScanner.ts)
             const areaTag = payload.area.toLowerCase().replace(/\s+/g, '-');
-            webviewProvider.setFilter({ tag: areaTag });
+            treeProvider.setFilter({ tag: areaTag });
             vscode.window.setStatusBarMessage(
               `Dashboard: Filtering by Area: ${payload.area} (tag: ${areaTag})`,
               3000
             );
           } else if (payload.type) {
-            webviewProvider.setFilter({ type: payload.type });
+            treeProvider.setFilter({ type: payload.type });
             vscode.window.setStatusBarMessage(`Dashboard: Filtering by ${payload.type}`, 3000);
           }
         } else if (typeof payload === 'string') {
           const filterType = payload;
-          webviewProvider.setFilter({ type: filterType });
+          treeProvider.setFilter({ type: filterType });
           vscode.window.setStatusBarMessage(`Dashboard: Filtering by ${filterType}`, 3000);
         }
       }
@@ -724,7 +727,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Command to clear filter
     context.subscriptions.push(
       vscode.commands.registerCommand('cortex.clearFilter', () => {
-        webviewProvider.setFilter(undefined);
+        treeProvider.setFilter(undefined);
       })
     );
 
@@ -876,7 +879,7 @@ export async function activate(context: vscode.ExtensionContext) {
               console.log(
                 '[Cortex] No memories found. Triggering intelligent auto-scan on startup...'
               );
-              vscode.commands.executeCommand('cortex.scanWithAI');
+              void startProjectAnalysis('startup');
             } else {
               console.log(`[Cortex] Startup scan skipped: ${stats.total} memories found.`);
             }

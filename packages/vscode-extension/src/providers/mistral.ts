@@ -80,6 +80,7 @@ export class MistralModelAdapter implements ModelAdapter {
   ): Promise<MistralModelAdapter | null> {
     let apiKey = CortexConfig.getApiKey(AIProvider.Mistral);
     if (!apiKey) apiKey = (await secrets.get(SECRET_KEY)) || '';
+    if (!apiKey) apiKey = process.env['MISTRAL_API_KEY'] || '';
     if (!apiKey) return null;
 
     const configuredModel = CortexConfig.getModel(AIProvider.Mistral) as MistralModelId;

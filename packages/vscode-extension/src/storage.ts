@@ -232,7 +232,7 @@ export class MemoryStore implements IMemoryStore {
       content: memory.content,
       type: memory.type,
       source: memory.source,
-      projectId: memory.projectId,
+      projectId: memory.projectId || this.projectId || undefined,
       tags: memory.tags,
       metadata: memory.metadata,
       createdAt: new Date().toISOString(),

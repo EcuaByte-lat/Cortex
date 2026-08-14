@@ -384,10 +384,15 @@
             "gemini",
             "openai",
             "anthropic",
-            "ollama"
+            "mistral",
+            "deepseek",
+            "ollama",
+            "codex",
+            "claude",
+            "copilot"
           ],
           "default": "auto",
-          "markdownDescription": "Select the AI Provider.\n- **auto**: Detects available keys (Claude > GPT-5 > Gemini).\n- **gemini**: Google Gemini (Recommended for Free Tier).\n- **openai**: OpenAI (GPT-5/4o).\n- **anthropic**: Anthropic (Claude 3.5/4.5).\n- **ollama**: Local/Ollama models."
+          "markdownDescription": "Select the AI Provider.\n- **auto**: Detects configured API keys and authenticated local CLIs, then falls back across working providers.\n- **gemini**: Google Gemini (Recommended for Free Tier).\n- **openai**: OpenAI (GPT-5/4o).\n- **anthropic**: Anthropic (Claude 3.5/4.5).\n- **codex**: OpenAI Codex CLI.\n- **claude**: Claude Code CLI.\n- **copilot**: GitHub Copilot CLI.\n- **ollama**: Local/Ollama models."
         },
         "cortex.model.custom": {
           "type": "string",

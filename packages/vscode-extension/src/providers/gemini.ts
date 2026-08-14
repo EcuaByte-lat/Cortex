@@ -172,6 +172,8 @@ export class GeminiModelAdapter implements ModelAdapter {
       apiKey = (await secrets.get(SECRET_KEY)) || '';
     }
 
+    if (!apiKey) apiKey = process.env['GEMINI_API_KEY'] || process.env['GOOGLE_API_KEY'] || '';
+
     if (!apiKey) return null;
 
     // determine model: argument > config > default

@@ -125,6 +125,8 @@ export class AnthropicModelAdapter implements ModelAdapter {
       apiKey = (await secrets.get(SECRET_KEY)) || '';
     }
 
+    if (!apiKey) apiKey = process.env['ANTHROPIC_API_KEY'] || '';
+
     if (!apiKey) return null;
 
     // determine model: argument > config > default

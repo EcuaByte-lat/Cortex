@@ -54,15 +54,12 @@ export class MemoryTreeProvider implements vscode.TreeDataProvider<MemoryTreeIte
 
         const items = memories.map((m) => this.createMemoryItem(m));
         // Add a "Clear Filter" item at the top
-        const filterLabel = tag ? `Tag: ${tag}` : type || 'Custom';
         const clearItem = new MemoryTreeItem(
-          'running_filter',
-          `Filter: ${filterLabel}`,
+          'Clear Filter',
+          `Showing ${memories.length} results`,
           vscode.TreeItemCollapsibleState.None,
           'dashboard_running'
         );
-        clearItem.label = 'Clear Filter';
-        clearItem.description = `Showing ${memories.length} results`;
         clearItem.command = { command: 'cortex.clearFilter', title: 'Clear Filter' };
 
         return [clearItem, ...items];
