@@ -197,8 +197,20 @@ jobs:
           if [[ "$MARKETPLACE_HAS_VERSION" != "true" ]]; then
             echo "📦 Publishing VS Code Extension..."
             cd packages/vscode-extension
-            bunx @vscode/vsce publish --no-dependencies -p "$VSCE_PAT"
-            echo "✅ VS Code Extension published successfully"
+            set +e
+            PUBLISH_OUTPUT=$(bunx @vscode/vsce publish --no-dependencies -p "$VSCE_PAT" 2>&1)
+            PUBLISH_STATUS=$?
+            set -e
+            echo "$PUBLISH_OUTPUT"
+
+            if [[ "$PUBLISH_STATUS" -eq 0 ]]; then
+              echo "✅ VS Code Extension published successfully"
+            elif [[ "$PUBLISH_OUTPUT" == *"already exists"* ]]; then
+              echo "ℹ️ VS Code Marketplace already has $EXTENSION_VERSION, continuing."
+            else
+              echo "❌ VS Code Extension publishing failed."
+              exit "$PUBLISH_STATUS"
+            fi
           else
             echo "ℹ️ VS Code Marketplace already has $EXTENSION_VERSION, skipping."
           fi
@@ -292,4 +304,3 @@ jobs:
           repository: ${{ vars.PARENT_REPOSITORY }}
           event-type: submodule-update
           client-payload: '{"submodule": "cortex"}'
-
