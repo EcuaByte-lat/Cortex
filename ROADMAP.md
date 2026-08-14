@@ -1,78 +1,76 @@
-# Cortex Protocol Roadmap
+# Cortex Roadmap
 
 ## Vision
 
-Become the universal context layer for AI — the HTTP of AI memory.
+Become the reliable, portable state plane for software work performed by humans and coding agents.
 
----
+## Product wedge
 
-## Phase 1: Foundation (Current - Q1 2026)
+> Agent A stops or hands off a task; Agent B resumes it from a compact, evidence-linked packet and reaches the next verified milestone without repeating the investigation.
 
-### ✅ Completed
-- [x] Core 5 primitives (store, get, route, guard, fuse)
-- [x] SQLite storage with FTS5
-- [x] MCP Server (13 tools)
-- [x] VS Code Extension v0.8.0 (AI Dashboard & Scanner)
-- [x] CLI tool with Universal Auto-Config
-- [x] Always-On Memory Rules (.cursorrules, CLAUDE.md)
-- [x] Gemini Code Assist (Antigravity) Support
-- [x] Protocol Specification v1.0-draft
-- [x] GitHub labels, templates, topics
+The roadmap is ordered by proof of continuation value, not by protocol breadth. Cortex should not build a universal memory graph, federation layer, or hosted platform before proving that verified handoffs improve engineering outcomes.
 
-### 🔄 In Progress
-- [ ] **Cortex Spotlight (Desktop)**: Beta (Awaiting logic integration).
-- [ ] **CLI UX Polish**: Interactive TUI (ink/prompts).
-- [/] **Enterprise Telemetry**: Token ROI tracking in `ctx/fuse`.
-- [ ] Semantic search native integration (`sqlite-vec`).
-- [ ] Documentation site (Starlight Portal).
+## Phase 0 - Reposition and baseline (current)
 
-### 📋 Planned
-- [ ] Python SDK
-- [ ] Official spec v1.0 release
+- [x] Adopt the verified engineering state thesis.
+- [x] Define canonical records: task, attempt, evidence, decision, artifact, handoff, verification, conflict.
+- [x] Publish market, distribution, and adoption strategy.
+- [ ] Restore the public README around handoffs and project state.
+- [ ] Create a benchmark repository with no-memory, Markdown, generic-memory, and Cortex baselines.
+- [ ] Define a versioned handoff schema and fixture corpus.
 
----
+## Phase 1 - Local handoff MVP
 
-## Phase 2: Semantic (Q2-Q3 2026)
+- [ ] `cortex start` creates or resumes a task scoped to repository, branch, and commit.
+- [ ] `cortex capture` records high-signal events: decisions, commands, files, tests, blockers, and artifacts.
+- [ ] `cortex handoff` emits human-readable Markdown and machine-readable JSON.
+- [ ] `cortex resume` retrieves a bounded packet for the current task and repository state.
+- [ ] `cortex verify` marks evidence and claims confirmed, failed, stale, superseded, or unverified.
+- [ ] Implement structured provenance, authority, freshness, and supersession.
+- [ ] Keep local-only operation and complete export/import.
+- [ ] Add integration tests for two sessions and concurrent CLI/MCP access.
 
-- [ ] Multiple embedding model support
-- [ ] Relation graphs between context
-- [ ] Context compression
-- [ ] ML-based relevance ranking
-- [ ] Smart deduplication
+Exit gate: benchmarked median resumption time improves by at least 25%, and 80% of packets are sufficient to continue.
 
----
+## Phase 2 - Repository-native distribution
 
-## Phase 3: Sync (Q3-Q4 2026)
+- [ ] GitHub Action captures commits/tests and publishes a handoff artifact.
+- [ ] PR check reports missing evidence, stale context, and unresolved conflicts.
+- [ ] Issue and PR templates include task, acceptance, handoff, and verification fields.
+- [ ] Official MCP Registry, npm/Bun, VS Code, Open VSX, and GitHub Marketplace packaging.
+- [ ] Public benchmark reports and reproducible examples.
 
-- [ ] `ctx/sync` primitive
-- [ ] Multi-device synchronization
-- [ ] CRDT-based conflict resolution
-- [ ] Cloud backup (optional)
+Exit gate: 60% of activated projects produce a second handoff within four weeks.
 
----
+## Phase 3 - Multi-agent and team continuity
 
-## Phase 4: Federation (2027)
+- [ ] Stable agent identity and attempt/session records.
+- [ ] Shared project workspace with explicit actor and repository scopes.
+- [ ] GitHub/GitLab integration and remote sync with conflict handling.
+- [ ] Team membership, retention, audit export, and workspace analytics.
+- [ ] MCP remote transport where it improves collaboration; local remains first-class.
+- [ ] Optional OpenTelemetry correlation for agent/tool/task events.
 
-- [ ] `ctx/federate` primitive
-- [ ] Cross-organization context sharing
-- [ ] `ctx/attest` for verification
-- [ ] Zero-knowledge proofs
-- [ ] Peer discovery protocol
+Exit gate: 40% of active projects have a second actor consume a handoff and at least three teams pay for shared functionality.
 
----
+## Phase 4 - Governance and enterprise deployment
 
-## Phase 5: Standard (2028+)
+- [ ] SSO/RBAC, policy enforcement, approvals, and evidence retention.
+- [ ] BYOC, self-hosted Docker/Helm, private networking, and regional data controls.
+- [ ] GitHub/GitLab/Bitbucket, Jira/Linear, CI, and Slack/Teams integrations where they improve an existing handoff event.
+- [ ] AWS/Azure/GCP Marketplace listings and private-offer procurement.
+- [ ] Security, deletion, export, and incident-response documentation.
 
-- [ ] Working group formation
-- [ ] RFC process
-- [ ] Linux Foundation / AAIF submission
-- [ ] Formal standard adoption
+## Explicitly deferred
 
----
+- [ ] Generic universal knowledge graph.
+- [ ] Consumer or personal-life memory.
+- [ ] New agent runtime or MCP registry.
+- [ ] A2A replacement or proprietary agent protocol.
+- [ ] CRDT/federation/zero-knowledge features before multi-user state is proven.
+- [ ] Broad marketplace integrations without a measured continuation workflow.
 
----
+## North-star metric
 
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) to help shape the future of Cortex Protocol.
+**Verified continuations per active project per week.** Downloads, stored records, raw MCP calls, and dashboard views are supporting metrics only.
 

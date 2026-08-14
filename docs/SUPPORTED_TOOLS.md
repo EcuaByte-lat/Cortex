@@ -1,10 +1,10 @@
 # 🛠️ Supported Tools & Editors (2026 Ready)
 
-Cortex is designed to be the **universal memory layer** for the next generation of AI development tools. It builds upon the [Model Context Protocol (MCP)](https://modelcontextprotocol.io), ensuring compatibility with any tool that speaks this open standard.
+Cortex is designed to be the **portable engineering-state and handoff layer** for AI development tools. It builds upon the [Model Context Protocol (MCP)](https://modelcontextprotocol.io), allowing compatible tools to consume the same evidence-backed project state.
 
-## ✅ Native Integrations
+## ✅ Configured and experimental integrations
 
-These editors are supported out-of-the-box by our **Auto-Installer**.
+These editors can be configured by the **Auto-Installer**. The support level describes transport or UI integration; it does not claim that capture, handoff, resume, and verification are all implemented.
 
 | Editor | Support Level | Config Method |
 |--------|---------------|---------------|
@@ -17,7 +17,7 @@ These editors are supported out-of-the-box by our **Auto-Installer**.
 | **Claude Code** | ⭐ Experimental | `bunx @ecuabyte/cortex-mcp-server generate-config --target claude` |
 | **Zed** | 🟢 Standard | `bunx @ecuabyte/cortex-mcp-server generate-config --target zed` |
 
-## 🔌 Universal MCP Support
+## 🔌 MCP Handoff Support
 
 Any tool that supports the Model Context Protocol (MCP) can connect to Cortex manually using the standard configuration:
 
@@ -32,15 +32,15 @@ Any tool that supports the Model Context Protocol (MCP) can connect to Cortex ma
 }
 ```
 
-### Verified Compatible Agents
+### MCP transport verified
 - **Goose** (Block)
 - **OpenInterpreter**
 - **Aider** (via MCP adapter)
 - **Roo Code** (VS Code Extension)
 
-## 🔮 Future Compatibility
+## 🔮 Future compatibility candidates
 
-As an open-source project following the 2026 Agentic Web standards, Cortex is committed to supporting:
+As an open-source project, Cortex may support:
 - All major IDEs via MCP.
 - Terminal-based agents.
 - Browser-based development environments (IDX, Codespaces).

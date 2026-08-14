@@ -1,6 +1,6 @@
 # Cortex MCP Server
 
-The Model Context Protocol bridge for AI memory.
+The Model Context Protocol bridge for evidence-backed engineering state and coding-agent handoffs.
 
 ## 📚 Central Documentation
 

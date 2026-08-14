@@ -1,6 +1,6 @@
 # Quick Start
 
-Get up and running with Cortex in under 5 minutes.
+Get the current Cortex foundation running in under 5 minutes. The verified handoff lifecycle is the product direction; the commands marked as planned are not yet implemented.
 
 ## Option 1: VS Code Extension (Recommended)
 
@@ -11,14 +11,14 @@ Get up and running with Cortex in under 5 minutes.
 2. **Open your project**
    - Open any project in VS Code
 
-3. **Run AI Scan**
+3. **Run project scan**
    - Click the brain icon (🧠) in the Activity Bar
    - Click **✨ AI Scan** button
-   - Watch as Cortex analyzes your project and extracts memories
+   - Watch as Cortex analyzes your project and extracts candidate project context
 
-4. **Use with Copilot**
-   - Copilot can now use `cortex_remember` and `cortex_recall` tools
-   - Your memories are automatically available as context
+4. **Connect an MCP client**
+   - Configure Cortex using [Universal setup](../UNIVERSAL_SETUP.md)
+   - Treat the current integration as context transport; reliable capture, handoff, resume, and verification are planned capabilities
 
 ## Option 2: CLI
 
@@ -33,7 +33,7 @@ bun install
 # Build all packages
 bun run build
 
-# Add your first memory
+# Add a current project fact or decision (legacy-compatible foundation)
 bun --cwd packages/cli run dev add \
   -c "We use PostgreSQL with Prisma ORM for database operations" \
   -t "decision"
@@ -41,7 +41,7 @@ bun --cwd packages/cli run dev add \
 # Search memories
 bun --cwd packages/cli run dev search "database"
 
-# Get context for a task
+# Retrieve context for a task
 bun --cwd packages/cli run dev context "setting up database migrations"
 ```
 
@@ -60,11 +60,9 @@ For Claude Desktop, Cursor, or other MCP clients:
 }
 ```
 
-Then in Claude/Cursor, you can say:
-- "Remember that we use TypeScript strict mode"
-- "What do you know about our authentication setup?"
+Then in Claude/Cursor, you can query project context. Do not treat a retrieved item as verified unless its source, scope, and freshness are clear.
 
-## Memory Types
+## Current record types
 
 | Type | Use For |
 |------|---------|
@@ -76,5 +74,7 @@ Then in Claude/Cursor, you can say:
 
 ## Next Steps
 
+- [Product direction](../strategy/PRODUCT_DIRECTION.md) - Reliable engineering state and handoffs
+- [Handoff contract](../architecture/HANDOFF_CONTRACT.md) - Planned domain contract
 - [Development Guide](../DEVELOPMENT.md) - Contributing to Cortex
 - [Examples](./examples.md) - More usage examples

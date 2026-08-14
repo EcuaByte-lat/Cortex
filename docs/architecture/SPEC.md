@@ -1,14 +1,16 @@
 # Cortex Architecture Specification
 
 **Version**: 1.0-draft  
-**Status**: Draft  
+**Status**: Legacy context draft; not the current handoff contract
 **Date**: January 2026
+
+> The current product contract is [HANDOFF_CONTRACT.md](./HANDOFF_CONTRACT.md). This document remains as a compatibility reference for the existing `ctx/*` primitives and must not be used to claim that the planned handoff lifecycle is implemented.
 
 ---
 
 ## Abstract
 
-Cortex defines an open platform for persistent, privacy-first context management in AI systems. It specifies how AI agents store, retrieve, route, protect, and share contextual information across sessions, devices, and organizations.
+Cortex defines an open, local-first platform for evidence-backed engineering state. It specifies how humans and coding agents capture, retrieve, verify, and hand off project state across sessions, tools, repositories, and organizations.
 
 ## 1. Introduction
 
@@ -16,7 +18,7 @@ Cortex defines an open platform for persistent, privacy-first context management
 
 Current AI systems lack a standardized mechanism for:
 - Persisting context beyond a single session
-- Sharing context between different AI agents
+- Resuming work between different coding agents without repeating investigation
 - Protecting sensitive information in context
 - Routing relevant context to the right task
 
@@ -27,15 +29,17 @@ Current AI systems lack a standardized mechanism for:
 3. **Simplicity**: Small set of composable primitives
 4. **Extensibility**: Support future capabilities without breaking changes
 
-### 1.3 Relationship to MCP
+### 1.3 Product boundary and relationship to MCP
 
 The Model Context Protocol (MCP) standardizes how AI connects to **tools**.  
 Cortex standardizes how AI manages **context**.
 
 ```
 MCP: "How AI DOES things"
-Cortex: "How AI KNOWS things"
+Cortex: "Which project state the next agent can trust"
 ```
+
+Cortex is not a replacement for Git, CI, issue trackers, observability, A2A, or MCP registries. Those systems remain authoritative for their own domains. Cortex links their evidence into a portable task and handoff record.
 
 ---
 

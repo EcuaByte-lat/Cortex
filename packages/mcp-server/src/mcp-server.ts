@@ -194,7 +194,7 @@ try {
               command,
               args: cmdArgs,
               trust: true,
-              description: 'Cortex Memory Protocol - Persistent AI memory',
+              description: 'Cortex engineering state and verified handoffs for coding agents',
             },
           },
         };

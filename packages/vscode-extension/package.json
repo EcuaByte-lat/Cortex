@@ -2,7 +2,7 @@
   "name": "cortex-vscode",
   "version": "0.8.2",
   "displayName": "Cortex: AI Memory",
-  "description": "Persistent Memory for AI Agents. Remember context, decisions, and code patterns across sessions. Works with Copilot, Claude, and more.",
+  "description": "Evidence-backed engineering state and task handoffs for coding agents. Works with Copilot, Claude, and more.",
   "publisher": "EcuaByte",
   "author": {
     "name": "EcuaByte",
@@ -542,12 +542,12 @@
       {
         "id": "cortex.gettingStarted",
         "title": "Getting Started with Cortex",
-        "description": "Learn how to use persistent memory for AI coding assistants",
+        "description": "Learn how to use verified engineering state and task handoffs for AI coding assistants",
         "steps": [
           {
             "id": "cortex.welcome",
             "title": "Welcome to Cortex",
-            "description": "Cortex gives your AI assistants persistent memory that survives across sessions.\n\nYour project context, decisions, and code patterns are remembered forever.\n\n[Open Cortex Panel](command:cortex.memoryTree.focus)",
+            "description": "Cortex preserves evidence-backed project state across sessions.\n\nReview decisions, context, and handoff candidates in one place.\n\n[Open Cortex Panel](command:cortex.memoryTree.focus)",
             "media": {
               "markdown": "## 🧠 What is Cortex?\n\nCortex is a **persistent memory layer** for AI coding assistants.\n\n- 💡 **Facts** - Project architecture and context\n- ✅ **Decisions** - Why you chose specific patterns\n- 💻 **Code** - Reusable snippets and patterns\n- ⚙️ **Config** - Configuration details\n- 📝 **Notes** - General observations"
             }

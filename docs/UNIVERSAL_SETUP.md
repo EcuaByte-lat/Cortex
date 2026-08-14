@@ -1,6 +1,8 @@
 # Universal Cortex Setup Guide
 
-Cortex is designed to work as a **Universal Memory Layer** for any AI-powered development environment. While it has a dedicated [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode), you can also use it with **Cursor**, **Windsurf**, **Claude Code**, **Goose**, **JetBrains**, and **Neovim** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
+Cortex is designed to preserve **verified engineering state and handoffs** across AI-powered development environments. While it has a dedicated [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode), you can also use it with **Cursor**, **Windsurf**, **Claude Code**, **Goose**, **JetBrains**, and **Neovim** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
+
+The goal is not to capture a user's entire AI history. Cortex records the project, task, evidence, decisions, artifacts, verification, and next steps needed to resume software work safely in another session or agent.
 
 ## 🚀 Quick Setup (All Tools)
 
@@ -140,7 +142,7 @@ Or manually add to `~/.gemini/antigravity/mcp_config.json`:
       "command": "bunx",
       "args": ["@ecuabyte/cortex-mcp-server"],
       "trust": true,
-      "description": "Cortex Memory Protocol - Persistent AI memory"
+      "description": "Cortex engineering state and verified handoffs for coding agents"
     }
   }
 }

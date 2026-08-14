@@ -15,5 +15,5 @@ keywords:
   - "operating-system"
   - "artificial-intelligence"
   - "software-engineering"
-abstract: "Cortex is a persistent memory layer for AI coding assistants, enabling synchronization of institutional context across developers and agents locally and securely."
+abstract: "Cortex is a local-first engineering state plane for evidence-backed handoffs between developers and coding agents across sessions, tools, and vendors."
 license: "MIT"

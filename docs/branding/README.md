@@ -91,7 +91,7 @@ Use `png/icon-512.png` as your npm package icon.
 ## 🎯 Design Concept
 
 The Cortex logo represents:
-- **Neural Network**: Central hub with connected nodes symbolizing AI memory
+- **Engineering graph**: Central hub with connected nodes symbolizing project state, evidence, and handoffs
 - **Persistent Memory**: The inner core represents stored knowledge that persists
 - **Connectivity**: Radiating pathways show integration with multiple tools
 - **Modern Tech**: Purple gradient represents AI/ML industry aesthetics
@@ -102,4 +102,4 @@ MIT License - Free to use with attribution.
 
 ---
 
-**Created for [Cortex](https://github.com/EcuaByte-lat/Cortex)** - Persistent memory for AI coding assistants
+**Created for [Cortex](https://github.com/EcuaByte-lat/Cortex)** - Evidence-backed engineering state for coding agents

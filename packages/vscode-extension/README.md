@@ -1,6 +1,6 @@
 # Cortex VS Code Extension
 
-Persistent AI memory directly in your editor.
+Evidence-backed engineering state and task handoffs directly in your editor.
 
 ## 📚 Central Documentation
 

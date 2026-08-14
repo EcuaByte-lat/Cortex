@@ -37,7 +37,7 @@ let embeddingAvailable = false;
 
 program
   .name('cortex')
-  .description('🧠 Universal memory layer for AI coding tools')
+  .description('Evidence-backed engineering state and handoffs for coding agents')
   .version('0.8.2');
 
 // Add memory

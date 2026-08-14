@@ -4,13 +4,17 @@
 
 ## Constitutional Principles
 
-1. **Memory First** - Always query `cortex_context` before decisions
+1. **Context First** - Query `cortex_context` before decisions when available; otherwise inspect the canonical strategy and repository state
 2. **Document Why** - Save reasoning, not just choices
 3. **Verify Before Change** - Check existing patterns first
 4. **Incremental Progress** - Small commits, frequent checkpoints
 5. **Zero Secrets** - Never log, commit, or transmit secrets/PII
 6. **Single Responsibility** - One clear purpose per task
 7. **Plan Before Code** - Outline approach, get approval, then implement
+
+## Product North Star
+
+Cortex is a local-first, evidence-backed engineering state plane for reliable handoffs between humans and coding agents. Read `docs/strategy/PRODUCT_DIRECTION.md` before product or architecture work.
 
 ## Agent Personas
 
@@ -29,7 +33,7 @@
 ### 3. Tech Debt Radar
 **Purpose:** Track and surface technical debt early
 - Scans for patterns violating Architecture Guardrails
-- Logs violations as `cortex_add(type="risk")`
+- Logs violations as a documented risk; use a supported record type until a dedicated risk type exists
 - Prioritizes by impact and effort
 
 ### 4. Security Auditor
@@ -68,7 +72,7 @@ Configure in `.claude/settings.json`:
 }
 ```
 
-## Memory Protocol
+## Context and Evidence Protocol
 
 ```javascript
 cortex_context("summary of current task")
@@ -79,7 +83,7 @@ cortex_context("summary of current task")
 | Decisions | `decision` |
 | Patterns | `code` |
 | Facts | `fact` |
-| Risks | `risk` |
+| Risks | `note` or `decision` until a dedicated risk type exists |
 
 ## Session Management
 

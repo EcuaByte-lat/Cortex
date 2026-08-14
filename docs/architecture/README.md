@@ -1,17 +1,17 @@
 # Cortex Documentation
 
-**The Universal Context Layer for AI**
+**The verified engineering state plane for coding agents**
 
 ---
 
 ## Overview
 
-Cortex is an open platform for how AI systems store, retrieve, and share context. It defines the missing layer between AI models and the tools they use.
+Cortex is an open, local-first platform for capturing, retrieving, and verifying engineering state. It connects the evidence produced by agents, Git, CI, and project workflows into portable handoffs.
 
 ```
 ┌─ AI Applications (Claude, Copilot, Cursor)
 ├─ Tool Layer (MCP)     ← "How AI DOES things"
-├─ Context Layer (Cortex) ← "How AI KNOWS things"
+├─ Engineering State Layer (Cortex) ← "What project state is trustworthy"
 └─ Model Layer (GPT, Claude, Llama)
 ```
 
@@ -36,14 +36,16 @@ Cortex is an open platform for how AI systems store, retrieve, and share context
 | [SPEC.md](./SPEC.md) | Formal protocol specification v1.0-draft |
 | [primitives/](./primitives/) | Detailed primitive documentation |
 
+The `ctx/*` primitives and `SPEC.md` describe the compatibility foundation. The current product domain is defined by [HANDOFF_CONTRACT.md](./HANDOFF_CONTRACT.md): project, task, attempt, evidence, decision, artifact, verification, handoff, and conflict.
+
 ---
 
 ## Principles
 
-1. **Local-First** — Works offline, data never leaves unless you want
+1. **Local-First** — An offline path is first-class; external egress is explicit and configurable
 2. **User-Owned** — You own your context, not the platforms
 3. **Privacy-by-Design** — `ctx/guard` is a primitive, not a plugin
-4. **Interoperable** — MCP-native, A2A compatible, works with any AI
+4. **Interoperable** — MCP-native, portable across tools, and compatible with agent runtimes where tested
 5. **Open Standard** — No vendor lock-in, ever
 
 ---
@@ -63,7 +65,7 @@ Cortex is an open platform for how AI systems store, retrieve, and share context
 ## Implementations
 
 - **Reference Implementation**: [Cortex](https://github.com/EcuaByte-lat/Cortex)
-- **Universal CLI**: `@ecuabyte/cortex-cli` (Auto-Installer & Manager)
+- **CLI**: `@ecuabyte/cortex-cli` (Auto-Installer & Manager)
 - **MCP Server**: `@ecuabyte/cortex-mcp-server`
 - **VS Code Extension**: [Cortex](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode)
 
