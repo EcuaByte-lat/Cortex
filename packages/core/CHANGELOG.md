@@ -1,5 +1,13 @@
 # @ecuabyte/cortex-core
 
+## 0.9.0
+
+### Minor Changes
+
+- [#41](https://github.com/EcuaByte-lat/Cortex/pull/41) [`3a4c84a`](https://github.com/EcuaByte-lat/Cortex/commit/3a4c84a2153234069619aea8fab0a72627d31e97) Thanks [@aquirozdev](https://github.com/aquirozdev)! - Add native coding-agent lifecycle ingestion through the Agent Bridge, including
+  Codex hooks, OpenCode plugins, durable deduplication, automatic handoffs, and
+  redaction before persistence.
+
 ## 0.8.3
 
 ## 0.8.2
