@@ -180,39 +180,44 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
 
       # ─────────────────────────────────────────────────────────────────────────
-      # VS Code Extension Publishing (only if packages were published)
+      # VS Code Extension Publishing (version-gated against Marketplace)
       # ─────────────────────────────────────────────────────────────────────────
       - name: Publish VS Code Extension
-        if: steps.changesets.outputs.published == 'true'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          # Check if cortex-vscode was in the published packages
-          PUBLISHED=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cortex-vscode") | .name')
+          EXTENSION_VERSION=$(node -p "require('./packages/vscode-extension/package.json').version")
+          MARKETPLACE_VERSION=$(curl -fsSL -X POST \
+            -H 'Content-Type: application/json' \
+            --data '{"filters":[{"criteria":[{"filterType":7,"value":"EcuaByte.cortex-vscode"}]}],"flags":914}' \
+            'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=7.2-preview.1' \
+            | jq -r '.results[0].extensions[0].versions[0].version // "0.0.0"')
 
-          if [[ "$PUBLISHED" == "cortex-vscode" ]]; then
+          if [[ "$EXTENSION_VERSION" != "$MARKETPLACE_VERSION" ]]; then
             echo "📦 Publishing VS Code Extension..."
             cd packages/vscode-extension
             bunx vsce publish --no-dependencies -p $VSCE_PAT
             echo "✅ VS Code Extension published successfully"
           else
-            echo "ℹ️ cortex-vscode not included in this release, skipping."
+            echo "ℹ️ VS Code Marketplace already has $EXTENSION_VERSION, skipping."
           fi
 
       - name: Publish to Open VSX Registry
-        if: steps.changesets.outputs.published == 'true'
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
-          PUBLISHED=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cortex-vscode") | .name')
+          EXTENSION_VERSION=$(node -p "require('./packages/vscode-extension/package.json').version")
+          OVSX_VERSION=$(curl -fsSL \
+            'https://open-vsx.org/api/EcuaByte/cortex-vscode' \
+            | jq -r '.version // "0.0.0"' || echo "0.0.0")
 
-          if [[ "$PUBLISHED" == "cortex-vscode" ]]; then
+          if [[ "$EXTENSION_VERSION" != "$OVSX_VERSION" ]]; then
             echo "📦 Publishing to Open VSX..."
             cd packages/vscode-extension
             bunx ovsx publish --no-dependencies -p $OVSX_PAT
             echo "✅ Published to Open VSX successfully"
           else
-             echo "ℹ️ cortex-vscode not included, skipping OpenVSX."
+             echo "ℹ️ Open VSX already has $EXTENSION_VERSION, skipping."
           fi
 
   # ═══════════════════════════════════════════════════════════════════════════
