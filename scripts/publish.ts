@@ -38,7 +38,7 @@ interface PublishResult {
 
 // Get all package info
 async function getAllPackages(): Promise<Map<string, PackageInfo>> {
-  // Ensure .npmrc exists with token for bun publish
+  // Ensure .npmrc exists with token for npm publish
   const token = process.env.NPM_TOKEN || process.env.NODE_AUTH_TOKEN;
   if (token) {
     console.log('🔑 Configuring .npmrc with token...');
@@ -148,8 +148,9 @@ async function publishPackage(
   const original = await resolveWorkspaceDeps(pkgPath, allPackages);
 
   try {
-    // Use bun publish (handles workspace: protocol and has better auth UX)
-    const result = await $`cd ${pkgPath} && bun publish --access public 2>&1`.nothrow();
+    // Use npm publish: setup-node configures the registry and npm auth in CI.
+    // workspace: dependencies have already been resolved above.
+    const result = await $`cd ${pkgPath} && npm publish --access public 2>&1`.nothrow();
 
     if (result.exitCode !== 0) {
       const output = result.text();
