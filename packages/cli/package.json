@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-cli",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "CLI for capturing verified engineering state and resuming coding-agent tasks",
   "type": "module",
   "bin": {

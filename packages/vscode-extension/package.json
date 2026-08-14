@@ -1,6 +1,6 @@
 {
   "name": "cortex-vscode",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "displayName": "Cortex: Engineering State",
   "description": "Evidence-backed engineering state and task handoffs for coding agents. Works with Copilot, Claude, and more.",
   "publisher": "EcuaByte",

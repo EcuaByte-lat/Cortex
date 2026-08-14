@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.2
+
+### Patch Changes
+
+- [#53](https://github.com/EcuaByte-lat/Cortex/pull/53) [`6a2d03f`](https://github.com/EcuaByte-lat/Cortex/commit/6a2d03f55ece68b44dfd13b4cb7cbfa00efa80b7) Thanks [@aquirozdev](https://github.com/aquirozdev)! - Detect authenticated coding CLIs and automatically fall back across available providers during AI scans.
+
 ## 0.9.1
 
 ### Patch Changes
