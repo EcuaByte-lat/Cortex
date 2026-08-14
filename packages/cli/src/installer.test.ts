@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { join } from 'node:path';
 import {
   detectInstalledEditors,
   type EditorConfig,
@@ -74,7 +75,7 @@ describe('Cortex Installer', () => {
       const result = installForEditor(cursorConfig);
 
       expect(result.success).toBe(true);
-      expect(writtenFile).toContain('.cursor/mcp.json');
+      expect(writtenFile).toContain(join('.cursor', 'mcp.json'));
 
       const parsed = JSON.parse(writtenContent);
       expect(parsed.mcpServers.cortex).toBeDefined();
@@ -214,7 +215,7 @@ describe('Cortex Installer', () => {
 
       expect(result.success).toBe(true);
       expect(writtenPath).toContain('.cursorrules');
-      expect(writtenContent).toContain('Memory-First');
+      expect(writtenContent).toContain('Evidence-First');
     });
 
     it('should always overwrite existing files', () => {
