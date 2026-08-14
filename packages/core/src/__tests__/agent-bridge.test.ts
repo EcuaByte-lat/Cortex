@@ -24,6 +24,8 @@ function createPromptEvent(overrides: Partial<AgentEvent> = {}): AgentEvent {
     },
     objective: 'Implement agent continuity',
     summary: 'Implement continuity with api_key=sk-12345678901234567890',
+    source: 'agent',
+    authority: 'observed',
     occurredAt: '2026-08-14T12:00:00.000Z',
     ...overrides,
   };
@@ -53,6 +55,8 @@ describe('AgentBridge', () => {
     expect(events[0]?.summary).not.toContain('sk-12345678901234567890');
     expect(events[0]?.taskId).toBe(result.task?.id);
     expect(events[0]?.attemptId).toBe(result.attempt?.id);
+    expect(events[0]?.source).toBe('agent');
+    expect(events[0]?.authority).toBe('observed');
   });
 
   test('reuses the task and attempt for a session and checkpoints when it becomes idle', async () => {

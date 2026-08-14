@@ -69,17 +69,40 @@ async function buildMcpServer() {
   }
 }
 
+async function buildWebview() {
+  console.log('🔨 Building Dashboard Webview...');
+  const result = await Bun.build({
+    entrypoints: ['./src/webview.tsx'],
+    outdir: './dist',
+    naming: { entry: 'webview.js' },
+    target: 'browser',
+    format: 'iife',
+    minify: false,
+    sourcemap: 'external',
+  });
+
+  if (result.success) {
+    console.log('✅ Dashboard Webview built successfully');
+  } else {
+    console.error('❌ Dashboard Webview build failed:');
+    result.logs.forEach((log) => console.error(log));
+    if (!isWatch) process.exit(1);
+  }
+}
+
 // Initial build
 await buildExtension();
+await buildWebview();
 await buildMcpServer();
 
 // Watch mode
 if (isWatch) {
   console.log('👀 Watching for changes...');
   watch('./src', { recursive: true }, async (_event, filename) => {
-    if (filename?.endsWith('.ts')) {
+    if (filename?.endsWith('.ts') || filename?.endsWith('.tsx')) {
       console.log(`\n📝 File changed: ${filename}`);
       await buildExtension();
+      await buildWebview();
       await buildMcpServer();
     }
   });

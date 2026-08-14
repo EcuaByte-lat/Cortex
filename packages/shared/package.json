@@ -20,6 +20,9 @@
     "typecheck": "bunx tsc --noEmit",
     "build": "bunx tsc --declaration --emitDeclarationOnly --outDir dist"
   },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/EcuaByte-lat/Cortex.git",

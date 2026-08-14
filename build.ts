@@ -36,6 +36,21 @@ async function buildPackage(pkg: string): Promise<BuildResult> {
         return { package: pkg, success: false, duration: 0 };
       }
 
+      const webviewResult = await Bun.build({
+        entrypoints: ['./packages/vscode-extension/src/webview.tsx'],
+        outdir: './packages/vscode-extension/dist',
+        naming: { entry: 'webview.js' },
+        target: 'browser',
+        format: 'iife',
+        minify: true,
+        sourcemap: 'none',
+      });
+
+      if (!webviewResult.success) {
+        console.error(webviewResult.logs);
+        return { package: pkg, success: false, duration: 0 };
+      }
+
       // Copy sql-wasm.wasm to dist directory for runtime access
       const wasmSource = './node_modules/sql.js/dist/sql-wasm.wasm';
       const wasmDest = './packages/vscode-extension/dist/sql-wasm.wasm';

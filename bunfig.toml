@@ -3,6 +3,9 @@
 [install]
 # Use hoisted for monorepo compatibility
 linker = "hoisted"
+# Symlinks preserve package entrypoints on Windows; hardlink installs can omit
+# files exposed through package-level symlinks (notably TypeScript and scheduler).
+backend = "symlink"
 # Auto-install peer dependencies
 auto = "fallback"
 

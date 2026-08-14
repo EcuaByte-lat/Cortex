@@ -9,6 +9,7 @@ import { ContextObserver } from './contextObserver';
 import type { ContinuityDashboardSnapshot, DashboardTask } from './continuityDashboard';
 import { ContinuityMonitor } from './continuityMonitor';
 import { registerCortexTools } from './cortexTools';
+import { selectDashboardTask } from './dashboardCommands';
 import { MemoryTreeProvider } from './memoryTreeProvider';
 import { MemoryWebviewProvider } from './memoryWebviewProvider';
 import { VSCodeModelAdapter } from './providers';
@@ -33,6 +34,12 @@ function renderDashboardHandoff(
     `- Agent: ${task.actor?.harness ?? 'unknown'}${task.actor?.model ? ` (${task.actor.model})` : ''}`,
     `- Repository: ${task.repository.branch ?? 'unknown branch'} @ ${task.repository.commit ?? 'unknown commit'}`,
     '',
+    '## Acceptance criteria',
+    '',
+    task.acceptanceCriteria.length > 0
+      ? task.acceptanceCriteria.map((criterion) => `- ${criterion}`).join('\n')
+      : '- No acceptance criteria recorded.',
+    '',
     '## Evidence health',
     '',
     `- Current: ${evidence.current}`,
@@ -45,7 +52,10 @@ function renderDashboardHandoff(
     '',
     events.length > 0
       ? events
-          .map((event) => `- **${event.type}** — ${event.summary} _(status: ${event.status})_`)
+          .map(
+            (event) =>
+              `- **${event.type}** — ${event.summary} _(status: ${event.status}; source: ${event.source ?? 'unknown'}; authority: ${event.authority ?? 'unknown'})_`
+          )
           .join('\n')
       : '- No activity recorded.',
     '',
@@ -697,8 +707,14 @@ export async function activate(context: vscode.ExtensionContext) {
           vscode.window.showWarningMessage('No continuity state is available yet.');
           return;
         }
-        const task =
-          snapshot.tasks.find((item) => item.id === snapshot.activeTaskId) ?? snapshot.tasks[0];
+        const requestedTaskId =
+          typeof payload === 'object' &&
+          payload !== null &&
+          'taskId' in payload &&
+          typeof payload.taskId === 'string'
+            ? payload.taskId
+            : undefined;
+        const task = selectDashboardTask(snapshot, requestedTaskId);
         if (!task) {
           vscode.window.showInformationMessage('No active task is available for a handoff.');
           return;
