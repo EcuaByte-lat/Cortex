@@ -61,3 +61,20 @@ it or place it in `.npmrc`.
 
 After configuring Trusted Publishing, rerun a failed release job from GitHub
 Actions. Do not add an npm token to the repository or commit a local `.npmrc`.
+
+## MCP Registry metadata
+
+The MCP server includes `mcpName` in
+`packages/mcp-server/package.json` and matching `server.json` metadata at the
+repository root. The official MCP Registry stores metadata, not package
+artifacts, so publish `@ecuabyte/cortex-mcp-server` to npm before publishing a
+new matching version with `mcp-publisher`.
+
+```bash
+mcp-publisher login github
+mcp-publisher publish
+```
+
+Keep the `version` in `server.json` equal to the published npm package version.
+The registry treats published metadata versions as immutable; update both
+versions for every release.

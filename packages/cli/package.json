@@ -1,7 +1,7 @@
 {
   "name": "@ecuabyte/cortex-cli",
   "version": "0.9.0",
-  "description": "Command-line interface for Cortex memory management",
+  "description": "CLI for capturing verified engineering state and resuming coding-agent tasks",
   "type": "module",
   "bin": {
     "cortex": "./dist/cli.js"
@@ -12,15 +12,18 @@
     "typecheck": "bunx tsc --noEmit"
   },
   "keywords": [
-    "ai",
+    "ai-agents",
+    "coding-agents",
+    "engineering-state",
+    "handoff",
+    "verification",
     "cli",
-    "memory",
-    "context",
     "mcp",
     "cortex"
   ],
   "author": "EcuaByte <hello@ecuabyte.com> (https://github.com/EcuaByte-lat)",
   "license": "MIT",
+  "homepage": "https://github.com/EcuaByte-lat/Cortex#readme",
   "publishConfig": {
     "access": "public"
   },

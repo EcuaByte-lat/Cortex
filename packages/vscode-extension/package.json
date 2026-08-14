@@ -1,7 +1,7 @@
 {
   "name": "cortex-vscode",
   "version": "0.9.0",
-  "displayName": "Cortex: AI Memory",
+  "displayName": "Cortex: Engineering State",
   "description": "Evidence-backed engineering state and task handoffs for coding agents. Works with Copilot, Claude, and more.",
   "publisher": "EcuaByte",
   "author": {
@@ -32,8 +32,12 @@
     "Machine Learning"
   ],
   "keywords": [
-    "ai",
-    "memory",
+    "ai-agents",
+    "coding-agents",
+    "engineering-state",
+    "handoff",
+    "verification",
+    "provenance",
     "context",
     "copilot",
     "claude",
@@ -95,18 +99,18 @@
     "languageModelTools": [
       {
         "name": "cortex_remember",
-        "displayName": "Save Memory",
+        "displayName": "Capture Context",
         "toolReferenceName": "cortex-remember",
         "icon": "$(brain)",
-        "userDescription": "Save important context for future AI sessions",
-        "modelDescription": "Saves information to the user's Cortex knowledge base. Use this when the user explicitly asks you to remember something, makes an important decision, establishes a project convention, or shares context that should persist across sessions. Types: 'fact' for project information, 'decision' for architectural choices, 'code' for patterns, 'config' for settings, 'note' for general notes.",
+        "userDescription": "Capture evidence-backed project context for future sessions",
+        "modelDescription": "Captures information in the user's Cortex project record. Use this when the user explicitly asks you to preserve context, makes an important decision, establishes a project convention, or shares evidence that should persist across sessions. Types: 'fact' for project information, 'decision' for architectural choices, 'code' for patterns, 'config' for settings, 'note' for general notes.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
           "properties": {
             "content": {
               "type": "string",
-              "description": "The content to remember"
+              "description": "The project context or evidence to capture"
             },
             "type": {
               "type": "string",
@@ -117,7 +121,7 @@
                 "config",
                 "note"
               ],
-              "description": "Type of memory"
+              "description": "Type of project context"
             },
             "tags": {
               "type": "array",
@@ -134,11 +138,11 @@
       },
       {
         "name": "cortex_recall",
-        "displayName": "Search Memories",
+        "displayName": "Search Project State",
         "toolReferenceName": "cortex-recall",
         "icon": "$(search)",
-        "userDescription": "Search saved project memories",
-        "modelDescription": "Searches the user's Cortex knowledge base for relevant memories. Use this to find past decisions, project facts, code patterns, or any context the user has previously saved. Always try to recall before asking the user questions they may have already answered.",
+        "userDescription": "Search saved project context",
+        "modelDescription": "Searches the user's Cortex project record for relevant decisions, facts, code patterns, configuration, and notes. Use this to find context already captured for the current project before asking the user to repeat it.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -173,7 +177,7 @@
       "activitybar": [
         {
           "id": "cortex-sidebar",
-          "title": "Cortex Memory",
+          "title": "Cortex State",
           "icon": "resources/icon.svg"
         }
       ]
@@ -182,7 +186,7 @@
       "cortex-sidebar": [
         {
           "id": "cortex.memoryTree",
-          "name": "Memories"
+          "name": "Project Context"
         },
         {
           "id": "cortex.toolsTree",
@@ -193,7 +197,7 @@
     "viewsWelcome": [
       {
         "view": "cortex.memoryTree",
-        "contents": "No memories yet.\n[$(search) Scan Project](command:cortex.scanProject)\n[$(add) Add Memory](command:cortex.addMemory)\n\nCapture project context that persists across AI sessions.\n[Learn more](https://github.com/EcuaByte-lat/Cortex)"
+        "contents": "No project context yet.\n[$(search) Scan Project](command:cortex.scanProject)\n[$(add) Capture Context](command:cortex.addMemory)\n\nCapture evidence-backed project context that persists across AI sessions.\n[Learn more](https://github.com/EcuaByte-lat/Cortex)"
       },
       {
         "view": "cortex.toolsTree",
@@ -203,12 +207,12 @@
     "commands": [
       {
         "command": "cortex.addMemory",
-        "title": "Cortex: Add Memory",
+        "title": "Cortex: Capture Context",
         "icon": "$(add)"
       },
       {
         "command": "cortex.searchMemories",
-        "title": "Cortex: Search Memories",
+        "title": "Cortex: Search Project State",
         "icon": "$(search)"
       },
       {
@@ -218,12 +222,12 @@
       },
       {
         "command": "cortex.deleteMemory",
-        "title": "Cortex: Delete Memory",
+        "title": "Cortex: Delete Context",
         "icon": "$(trash)"
       },
       {
         "command": "cortex.viewMemory",
-        "title": "Cortex: View Memory Details",
+        "title": "Cortex: View Context Details",
         "icon": "$(eye)"
       },
       {
@@ -243,7 +247,7 @@
       },
       {
         "command": "cortex.addSelectionAsMemory",
-        "title": "Cortex: Save Selection as Memory",
+        "title": "Cortex: Capture Selection",
         "icon": "$(add)"
       },
       {
@@ -549,15 +553,15 @@
             "title": "Welcome to Cortex",
             "description": "Cortex preserves evidence-backed project state across sessions.\n\nReview decisions, context, and handoff candidates in one place.\n\n[Open Cortex Panel](command:cortex.memoryTree.focus)",
             "media": {
-              "markdown": "## 🧠 What is Cortex?\n\nCortex is a **persistent memory layer** for AI coding assistants.\n\n- 💡 **Facts** - Project architecture and context\n- ✅ **Decisions** - Why you chose specific patterns\n- 💻 **Code** - Reusable snippets and patterns\n- ⚙️ **Config** - Configuration details\n- 📝 **Notes** - General observations"
+              "markdown": "## 🧠 What is Cortex?\n\nCortex is an **evidence-backed engineering state plane** for coding agents.\n\n- 💡 **Facts** - Project architecture and context\n- ✅ **Decisions** - Why you chose specific patterns\n- 💻 **Code** - Reusable snippets and patterns\n- ⚙️ **Config** - Configuration details\n- 📝 **Notes** - General observations"
             }
           },
           {
             "id": "cortex.addMemory",
-            "title": "Add Your First Memory",
-            "description": "Save important context that AI tools should remember.\n\n[Add Memory](command:cortex.addMemory)",
+            "title": "Capture Your First Context",
+            "description": "Save important project context for future sessions.\n\n[Capture Context](command:cortex.addMemory)",
             "media": {
-              "markdown": "## Adding Memories\n\n1. Click **Add Memory** or press `Ctrl+Shift+P`\n2. Enter the content you want to save\n3. Select the memory type\n4. Specify the source\n\nYour memory is now saved and will be available across all sessions!"
+              "markdown": "## Capturing Context\n\n1. Click **Capture Context** or press `Ctrl+Shift+P`\n2. Enter the project context you want to preserve\n3. Select the record type\n4. Specify the source\n\nThe context is now available across future sessions."
             },
             "completionEvents": [
               "onCommand:cortex.addMemory"
@@ -565,10 +569,10 @@
           },
           {
             "id": "cortex.search",
-            "title": "Search Your Memories",
-            "description": "Find any memory instantly with full-text search.\n\n[Search Memories](command:cortex.searchMemories)",
+            "title": "Search Project State",
+            "description": "Find project context instantly with full-text search.\n\n[Search Project State](command:cortex.searchMemories)",
             "media": {
-              "markdown": "## Searching Memories\n\nCortex includes **full-text search** across all your memories.\n\n- Search by content, source, or tags\n- Filter by memory type\n- Results are ranked by relevance"
+              "markdown": "## Searching Project State\n\nCortex includes **full-text search** across captured project context.\n\n- Search by content, source, or tags\n- Filter by record type\n- Results are ranked by relevance"
             },
             "completionEvents": [
               "onCommand:cortex.searchMemories"
@@ -579,7 +583,7 @@
             "title": "Connect to AI Tools",
             "description": "Integrate Cortex with GitHub Copilot, Claude, and more using MCP.\n\n[Learn more about MCP](https://github.com/EcuaByte-lat/Cortex#mcp-integration)",
             "media": {
-              "markdown": "## MCP Integration\n\nCortex includes an **MCP server** for integration with AI tools:\n\n### GitHub Copilot\n```\n@cortex search \"your query\"\n```\n\n### Claude Desktop\nAdd Cortex to your `claude_desktop_config.json` to enable memory access."
+              "markdown": "## MCP Integration\n\nCortex includes an **MCP server** for integration with AI tools. Add it to your client configuration, then use project-scoped context and continuity tools such as `cortex_start`, `cortex_capture`, and `cortex_resume`."
             }
           }
         ]

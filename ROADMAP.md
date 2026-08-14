@@ -41,18 +41,18 @@ The decision is supported by the 2025 Stack Overflow survey (84% use or plan to 
 - [x] Define canonical records: task, attempt, evidence, decision, artifact, handoff, verification, conflict.
 - [x] Publish market, distribution, and adoption strategy.
 - [x] Record the platform order: local CLI/MCP, GitHub, and VS Code first; agent adapters next; team and enterprise surfaces later.
-- [ ] Restore the public README around handoffs and project state.
+- [x] Restore the public README around handoffs and project state.
 - [ ] Create a benchmark repository with no-memory, Markdown, generic-memory, and Cortex baselines.
 - [ ] Define a versioned handoff schema and fixture corpus.
 
 ## Phase 1 - Local handoff MVP
 
-- [ ] Ship the local `cortex` CLI and MCP server as the common integration surface.
-- [ ] `cortex start` creates or resumes a task scoped to repository, branch, and commit.
-- [ ] `cortex capture` records high-signal events: decisions, commands, files, tests, blockers, and artifacts.
-- [ ] `cortex handoff` emits human-readable Markdown and machine-readable JSON.
-- [ ] `cortex resume` retrieves a bounded packet for the current task and repository state.
-- [ ] `cortex verify` marks evidence and claims confirmed, failed, stale, superseded, or unverified.
+- [x] Ship the local `cortex` CLI and MCP server as the common integration surface.
+- [x] `cortex start` creates or resumes a task scoped to repository, branch, and commit.
+- [x] `cortex capture` records high-signal events: decisions, commands, files, tests, blockers, and artifacts.
+- [x] `cortex handoff` emits human-readable Markdown and machine-readable JSON.
+- [x] `cortex resume` retrieves a bounded packet for the current task and repository state.
+- [x] `cortex verify` records verification status for evidence and claims.
 - [ ] Implement structured provenance, authority, freshness, and supersession.
 - [ ] Keep local-only operation and complete export/import.
 - [ ] Provide thin setup projections for Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI, Cline, and Zed; do not create provider-specific memory stores.

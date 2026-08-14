@@ -1,59 +1,128 @@
-# Cortex
+<div align="center">
+  <a href="https://github.com/EcuaByte-lat/Cortex">
+    <img src="docs/branding/svg/cortex-logo-horizontal.svg" alt="Cortex" width="320" />
+  </a>
 
-> Reliable, evidence-backed handoffs for coding agents.
+  <p><strong>Resume engineering work with evidence.</strong></p>
 
-Cortex preserves the state of software work so a human or coding agent can resume a task across sessions, tools, vendors, and machines without repeating the investigation or trusting stale assumptions.
+  <p>
+    <a href="https://github.com/EcuaByte-lat/Cortex/actions/workflows/unified.yml"><img src="https://github.com/EcuaByte-lat/Cortex/actions/workflows/unified.yml/badge.svg?branch=main" alt="CI status" /></a>
+    <a href="https://www.npmjs.com/package/@ecuabyte/cortex-cli"><img src="https://img.shields.io/npm/v/@ecuabyte/cortex-cli?label=CLI" alt="CLI on npm" /></a>
+    <a href="https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode"><img src="https://img.shields.io/visual-studio-marketplace/v/EcuaByte.cortex-vscode?label=VS%20Code" alt="VS Code extension" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-8B5CF6.svg" alt="MIT license" /></a>
+  </p>
+</div>
+
+Cortex is a local-first, MCP-native engineering state plane for coding agents. It links tasks, attempts, evidence, decisions, artifacts, verification, and handoffs so a human or another agent can continue from the latest trustworthy state.
 
 ```text
-task -> attempt -> evidence -> decision -> artifact -> verification -> handoff
+task → attempt → evidence → decision → artifact → verification → handoff
 ```
 
-## The product wedge
+> Agent A stops. Cortex records what happened and why. Agent B resumes with the repository state, evidence, blockers, and next safe action already in view.
 
-Agent A investigates or implements a task. Agent B resumes it later. Cortex produces a compact, portable handoff containing the repository, branch, commit, files, commands, tests, decisions, blockers, evidence, and next safe action.
+## Why Cortex
 
-Cortex is not a generic personal-memory assistant, a replacement for Git/CI/issues, an agent runtime, or an MCP registry. MCP is the access surface; the product value is trustworthy project state and verified continuation.
+Coding work is scattered across chat sessions, branches, issue comments, Markdown files, Git history, CI logs, and human memory. Cortex connects those signals without replacing Git, CI, issue trackers, or the agent runtime.
 
-## Current status
+- **Evidence before memory:** claims keep their source, authority, scope, and freshness.
+- **Repository-aware:** task state is scoped to the repository, branch, commit, and worktree.
+- **Local-first:** start with an inspectable local record; add synchronization only when it creates team value.
+- **Portable:** consume the same state from the CLI, MCP, VS Code, Codex, OpenCode, and other compatible agents.
+- **Honest by design:** an agent summary is not treated as verified until Git, tests, CI, tools, files, or a human support it.
 
-The repository currently provides a local SQLite/FTS5 foundation, a CLI, an MCP server, context routing/guarding/fusing, a project scanner, and a VS Code extension. The structured handoff lifecycle is the next product milestone and is documented as planned until implemented and tested.
+## What works today
 
-Do not interpret an MCP connection as proof that capture, handoff, resume, or verification is fully supported by an integration. See the [capability matrix](./docs/SUPPORTED_TOOLS.md).
+| Surface | Available now |
+| --- | --- |
+| CLI | `setup`, `install`, project scan, search, task start/resume, evidence capture, handoff, drift detection, and verification |
+| MCP server | Project-scoped context plus the continuity tools `cortex_start`, `cortex_capture`, `cortex_handoff`, `cortex_resume`, `cortex_detect`, and `cortex_verify` |
+| VS Code | Project scanning, context records, tool discovery, model-assisted analysis, and MCP setup |
+| Storage | Local SQLite with FTS5 search and project isolation |
+| Agent bridge | Codex and OpenCode lifecycle adapters that capture high-signal events with deduplication and redaction |
 
-## Install and explore the current foundation
+See the [capability matrix](./docs/SUPPORTED_TOOLS.md) for transport and editor-specific support. The lifecycle is implemented in the CLI/MCP foundation; integrations are intentionally tracked separately from the core record.
+
+## Quick start
+
+### Use the published CLI
+
+[Install Bun](https://bun.sh) 1.x, then run this from the repository you want to connect:
 
 ```bash
-bun install
-bun run dev:cli -- --help
-bun run dev:mcp
+bunx @ecuabyte/cortex-cli setup
 ```
 
-For editor setup, see [Universal setup](./docs/UNIVERSAL_SETUP.md). For the planned product flow, see [Product direction](./docs/strategy/PRODUCT_DIRECTION.md).
+This configures detected editors, writes project-scoped agent instructions, and scans the current project. For a reusable installation, install the CLI globally:
 
-## Strategic documents
+```bash
+bun add --global @ecuabyte/cortex-cli
+cortex setup
+```
 
-- [Strategy index](./docs/strategy/README.md)
-- [Product direction](./docs/strategy/PRODUCT_DIRECTION.md)
-- [Market research](./docs/strategy/MARKET_RESEARCH.md)
-- [Distribution](./docs/strategy/DISTRIBUTION.md)
-- [Adoption and compounding](./docs/strategy/ADOPTION.md)
-- [Handoff contract](./docs/architecture/HANDOFF_CONTRACT.md)
+### Create and hand off a task
+
+```bash
+cortex start "Implement database migrations" --acceptance "Migration tests pass" --agent codex
+# Capture the taskId and attemptId from the JSON response.
+cortex capture --task <taskId> --attempt <attemptId> \
+  --kind decision --summary "Keep migrations reversible" --source human
+cortex handoff --task <taskId> --attempt <attemptId> \
+  --next "Run the migration test suite"
+
+# In the next session or agent:
+cortex resume <taskId>
+cortex detect <taskId>
+cortex verify --task <taskId> --attempt <attemptId> \
+  --summary "Migration tests pass" --source test
+```
+
+### Connect an MCP client manually
+
+```json
+{
+  "mcpServers": {
+    "cortex": {
+      "command": "bunx",
+      "args": ["@ecuabyte/cortex-mcp-server"]
+    }
+  }
+}
+```
+
+Use the [universal setup guide](./docs/UNIVERSAL_SETUP.md) for Cursor, Windsurf, Claude, Gemini, Zed, and compatible MCP clients.
+
+## Development
+
+```bash
+git clone https://github.com/EcuaByte-lat/Cortex.git
+cd Cortex
+bun install
+bun run build
+bun run typecheck
+bun run test:all
+```
+
+Useful documentation:
+
+- [Quick start](./docs/getting-started/quick-start.md)
+- [CLI and editor installation](./docs/getting-started/installation.md)
+- [MCP and universal setup](./docs/UNIVERSAL_SETUP.md)
+- [Architecture and handoff contract](./docs/architecture/HANDOFF_CONTRACT.md)
 - [Roadmap](./ROADMAP.md)
+- [Contributing](./CONTRIBUTING.md)
+- [Support](./.github/SUPPORT.md)
 - [Security policy](./SECURITY.md)
+
+## Product direction
+
+Cortex is not a generic personal-memory assistant, a replacement for Git/CI/issues, an agent runtime, or an MCP registry. Its wedge is verified continuation: fewer repeated investigations, fewer stale assumptions, and a clear next step when work changes hands.
+
+The north-star metric is **verified continuations per active project per week**. Read the [product direction](./docs/strategy/PRODUCT_DIRECTION.md), [market research](./docs/strategy/MARKET_RESEARCH.md), [distribution strategy](./docs/strategy/DISTRIBUTION.md), and [adoption model](./docs/strategy/ADOPTION.md) for the full thesis.
 
 ## Privacy boundary
 
-Cortex is local-first, but local-first does not mean that every operation is guaranteed to be offline. Embeddings or other providers may receive data when explicitly configured. The product must make egress visible, configurable, and testable; it must not promise that code never leaves the machine without verifying the active configuration.
-
-## Development principles
-
-1. Evidence before memory.
-2. Project state before personal preference.
-3. Append raw signals before deriving summaries.
-4. Freshness, authority, and provenance are product data.
-5. Export and deletion are first-class.
-6. Integrations must improve a measured handoff event.
-7. The north-star metric is verified continuations per active project per week.
+Cortex is local-first, not a promise that every operation is offline. Embeddings or other providers may receive data when explicitly configured. Review the active provider and keep egress visible, configurable, and testable.
 
 ## License
 

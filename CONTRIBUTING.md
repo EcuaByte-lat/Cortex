@@ -22,8 +22,8 @@ First off, thanks for taking the time to contribute! 🎉
 
 ## Workflow
 - We use **Changesets** for versioning. If you modify a package, run `bunx changeset` to generate a changelog entry.
-- We use **Biome** for linting and formatting. Run `bun run check` before committing.
+- We use **Biome** for linting and formatting. Run `bun run check:ci` before committing.
 
 ## Pull Requests
 - Fill out the PR template.
-- Ensure all tests pass (`bun test`).
+- Ensure all tests pass (`bun run test:all`).

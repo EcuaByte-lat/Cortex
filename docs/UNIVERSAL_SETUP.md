@@ -2,6 +2,8 @@
 
 Cortex is designed to preserve **verified engineering state and handoffs** across AI-powered development environments. While it has a dedicated [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode), you can also use it with **Cursor**, **Windsurf**, **Claude Code**, **Goose**, **JetBrains**, and **Neovim** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
 
+The CLI and local MCP server require [Bun](https://bun.sh) 1.x because the local SQLite runtime and package scripts use Bun. The extension can be installed independently, but MCP-based continuity still requires a configured server runtime.
+
 The goal is not to capture a user's entire AI history. Cortex records the project, task, evidence, decisions, artifacts, verification, and next steps needed to resume software work safely in another session or agent.
 
 ## Native Agent Bridge
@@ -68,7 +70,7 @@ These editors support VS Code extensions but use the [Open VSX Registry](https:/
 
 1.  Open the **Extensions** panel.
 2.  Search for `Cortex` (or ID: `EcuaByte.cortex-vscode`).
-3.  Install **Cortex: AI Memory** published by `EcuaByte`.
+3.  Install **Cortex: Engineering State** published by `EcuaByte`.
 
 **Troubleshooting: Extension not found?**
  In some restricted environments (like corporate networks or older IDE versions), the search might fail.
@@ -101,7 +103,7 @@ Cortex works natively in Google IDX. Add it to your `.idx/dev.nix` file:
 
 ### 3. Claude Desktop
 
-To give Claude Desktop access to your project memories:
+To give Claude Desktop access to your project context and handoffs:
 
 1.  Open your config file:
     *   **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`

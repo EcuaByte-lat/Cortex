@@ -12,7 +12,7 @@ If you found a technical fault, please search existing [Issues](https://github.c
 Have an idea? Use the **Feature Request** template to pitch it to the community.
 
 ### 🔒 Security
-For security vulnerabilities, please email **security@ecuabyte.com** directly. See [SECURITY.md](SECURITY.md).
+For security vulnerabilities, please email **security@ecuabyte.com** directly. See [SECURITY.md](https://github.com/EcuaByte-lat/Cortex/blob/main/SECURITY.md).
 
 ## Commercial Support
-For enterprise SLAs, on-premise deployment, or dedicated support, please verify our [Enterprise Plans](https://cortex.ecuabyte.lat/enterprise).
+For enterprise SLAs, on-premise deployment, or dedicated support, please visit [Enterprise Plans](https://cortex.ecuabyte.lat/enterprise).

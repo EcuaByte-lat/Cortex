@@ -100,5 +100,5 @@ body:
           required: true
         - label: I have clearly described the problem and proposed solution
           required: true
-        - label: This feature aligns with Cortex's core purpose (persistent memory for AI tools)
+        - label: This feature aligns with Cortex's core purpose (verified engineering state and handoffs)
           required: true
