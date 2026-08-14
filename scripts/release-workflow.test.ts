@@ -16,9 +16,7 @@ describe('GitHub extension release workflow', () => {
     const workflow = await readFile(workflowPath, 'utf8');
 
     expect(workflow).toContain('name: Create GitHub Release');
-    expect(workflow).toContain(
-      `GH_TOKEN: \${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}`
-    );
+    expect(workflow).toContain(`GH_TOKEN: \${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}`);
     expect(workflow).toContain(`RELEASE_TAG="cortex-vscode@\${EXTENSION_VERSION}"`);
     expect(workflow).toContain('gh release view "$RELEASE_TAG"');
     expect(workflow).toContain('bunx @vscode/vsce package --no-dependencies');
