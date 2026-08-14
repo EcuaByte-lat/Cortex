@@ -4,7 +4,7 @@
 **Updated:** 2026-08-14
 **Decision:** Reposition Cortex from a generic AI memory layer to a verified engineering state plane.
 
-Distribution and retention are governed separately in [DISTRIBUTION.md](./DISTRIBUTION.md) and [ADOPTION.md](./ADOPTION.md). This document defines the product boundary; it is not a claim that every listed lifecycle command already exists.
+Distribution and retention are governed separately in [DISTRIBUTION.md](./DISTRIBUTION.md) and [ADOPTION.md](./ADOPTION.md). The local CLI/MCP lifecycle exists today; integrations, richer provenance, and measurable continuation outcomes remain active product work.
 
 ## One-sentence thesis
 

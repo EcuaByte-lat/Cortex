@@ -15,5 +15,7 @@ For MCP tool descriptions, installation guides, and editor configuration, please
 bunx @ecuabyte/cortex-mcp-server generate-config --target claude
 ```
 
+The server requires Bun 1.x. See the [universal setup guide](../../docs/UNIVERSAL_SETUP.md) for client configuration and the [capability matrix](../../docs/SUPPORTED_TOOLS.md) for current support levels.
+
 ## License
 MIT

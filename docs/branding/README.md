@@ -1,6 +1,6 @@
-# 🧠 Cortex Branding Assets
+# Cortex Branding Assets
 
-Complete logo and icon package for the Cortex AI Memory System.
+Logo and icon assets for Cortex: evidence-backed engineering state and handoffs for coding agents.
 
 ## 📁 File Structure
 

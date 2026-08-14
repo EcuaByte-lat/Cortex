@@ -3,6 +3,7 @@
   "version": "0.8.0",
   "description": "Cortex - Evidence-backed engineering state and handoffs for coding agents",
   "private": true,
+  "packageManager": "bun@1.3.5",
   "workspaces": [
     "packages/*"
   ],
@@ -42,10 +43,14 @@
     ]
   },
   "keywords": [
+    "ai-agents",
+    "coding-agents",
+    "engineering-state",
+    "handoff",
+    "verification",
+    "provenance",
     "mcp",
-    "ai",
-    "memory",
-    "context",
+    "context-engineering",
     "claude",
     "copilot",
     "cursor",
@@ -75,6 +80,6 @@
   },
   "engines": {
     "node": ">=18",
-    "bun": ">=1.0"
+    "bun": ">=1.3.5"
   }
 }

@@ -368,7 +368,7 @@ program
 
     // Display results
     console.log(`Files scanned: ${result.summary.filesScanned}`);
-    console.log(`Memories found: ${result.summary.memoriesFound}`);
+    console.log(`Candidate project records found: ${result.summary.memoriesFound}`);
     console.log('');
 
     const byType = Object.entries(result.summary.byType)
@@ -408,7 +408,7 @@ program
           // Skip duplicates
         }
       }
-      console.log(`✓ Saved ${saved} memories to Cortex\n`);
+      console.log(`✓ Saved ${saved} project records to Cortex\n`);
     } else if (options.save === false) {
       console.log('(Use without --no-save to store memories)\n');
     }
@@ -517,7 +517,7 @@ program
     console.log('💡 Tips:');
     console.log('   • Restart your editors to load the new configuration');
     console.log('   • Run `cortex scan` to analyze your project');
-    console.log('   • AI assistants can now use cortex_search, cortex_add, cortex_context\n');
+    console.log('   • AI assistants can now use Cortex context and continuity tools\n');
   });
 
 // Setup command - quick project initialization
@@ -551,7 +551,7 @@ program
       const result = await scanner.scan({ path: projectPath });
 
       console.log(`   Files scanned: ${result.summary.filesScanned}`);
-      console.log(`   Memories found: ${result.summary.memoriesFound}`);
+      console.log(`   Candidate project records found: ${result.summary.memoriesFound}`);
 
       // Save memories
       if (result.memories.length > 0) {
@@ -564,13 +564,13 @@ program
             // Skip duplicates
           }
         }
-        console.log(`   ✓ Saved ${saved} memories to Cortex\n`);
+        console.log(`   ✓ Saved ${saved} project records to Cortex\n`);
       }
     }
 
     console.log('\n🎉 Setup complete!\n');
     console.log('Your AI assistants can now access project context via Cortex.\n');
-    console.log('Try asking your AI: "What do you remember about this project?"\n');
+    console.log('Try asking your AI: "What project state and handoffs are available?"\n');
   });
 
 // Engineering continuity commands. These emit JSON so any agent can consume

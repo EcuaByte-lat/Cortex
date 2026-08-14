@@ -1,189 +1,164 @@
 # Installation
 
-This guide will help you install and set up Cortex on your system.
+Cortex runs on [Bun](https://bun.sh) and keeps its engineering-state record
+local to each project by default.
 
 ## Prerequisites
 
-Before installing Cortex, ensure you have:
+- [Bun](https://bun.sh) 1.x
+- Git
+- VS Code, if you want the editor extension
 
-- **[Bun](https://bun.sh)** >= 1.0 installed
-- **Git** for version control
-- **VS Code** (optional, but recommended for the extension)
+Verify Bun is available:
 
-### Installing Bun
-
-If you don't have Bun installed:
-
-```bash
-# macOS/Linux
-curl -fsSL https://bun.sh/install | bash
-
-# Windows
-powershell -c "irm bun.sh/install.ps1 | iex"
-```
-
-Verify installation:
 ```bash
 bun --version
 ```
 
-## Installation Methods
+## Published CLI
 
-### Option 1: Clone from GitHub (Recommended for Development)
+From the repository you want to configure, run:
 
 ```bash
-# Clone the repository
+bunx @ecuabyte/cortex-cli setup
+```
+
+For a reusable installation:
+
+```bash
+bun add --global @ecuabyte/cortex-cli
+cortex setup
+```
+
+`setup` detects supported editors, writes project-scoped agent instructions,
+installs optional repository bridges, and scans the current project. Review
+generated files before committing them.
+
+## Install from source
+
+Use this path when contributing to Cortex or testing unreleased changes:
+
+```bash
 git clone https://github.com/EcuaByte-lat/Cortex.git
 cd Cortex
-
-# Install dependencies
 bun install
-
-# Build all packages
 bun run build
-
-# Verify installation
-bun run dev:cli list
+bun run typecheck
+bun run test:all
 ```
 
-### Option 2: Install CLI Globally (Coming Soon)
+To run the development CLI directly:
 
 ```bash
-# Will be available after first release
-bun install -g @cortex/cli
+bun --cwd packages/cli run dev -- --help
 ```
 
-### Option 3: Use MCP Server Only
+## MCP server
 
-If you only need the MCP server for AI tool integration:
+The published server can be registered with an MCP client using:
 
-```bash
-# Clone and build
-git clone https://github.com/EcuaByte-lat/Cortex.git
-cd Cortex
-bun install
-bun run build:mcp
-
-# Configure in your AI tool (see MCP Integration guide)
+```json
+{
+  "mcpServers": {
+    "cortex": {
+      "command": "bunx",
+      "args": ["@ecuabyte/cortex-mcp-server"]
+    }
+  }
+}
 ```
 
-## Package-Specific Setup
+See the [universal setup guide](../UNIVERSAL_SETUP.md) for Claude, Cursor,
+Windsurf, Goose, Gemini, Zed, and other supported clients.
 
-### CLI Tool
+## VS Code extension
 
-```bash
-# Test CLI
-bun run dev:cli --help
+Install [Cortex: Engineering State](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode)
+from the Marketplace, then open a project and use the Cortex view in the
+Activity Bar. The extension provides project scanning, context records, tool
+discovery, and MCP setup.
 
-# Add your first memory
-bun run dev:cli add -c "Example memory" -t "fact" -s "manual"
+For extension development:
 
-# List memories
-bun run dev:cli list
-```
-
-### MCP Server
-
-```bash
-# Start MCP server
-bun run dev:mcp
-
-# Configure in AI tools (see guides/mcp-integration.md)
-```
-
-### VS Code Extension
-
-1. Open Cortex project in VS Code
-2. Press `F5` to launch Extension Development Host
-3. The extension will appear in the sidebar (Cortex icon)
-
-For packaging:
 ```bash
 cd packages/vscode-extension
+bun install
 bun run build
-# Install .vsix file manually (coming soon to marketplace)
 ```
 
-## Verification
+## Verify a handoff
 
-After installation, verify everything works:
+After installation, exercise the local continuity flow:
 
 ```bash
-# Run tests
-bun test
+cortex start "Implement database migrations" \
+  --acceptance "Migration tests pass" \
+  --agent codex
 
-# Type checking
-bun run typecheck
+cortex capture --task <taskId> --attempt <attemptId> \
+  --kind decision \
+  --summary "Keep migrations reversible" \
+  --source human
 
-# Build all packages
-bun run build
-```
+cortex handoff --task <taskId> --attempt <attemptId> \
+  --next "Run the migration test suite"
 
-You should see:
-```
-✓ All tests passing
-✓ No type errors
-✓ All packages built successfully
+cortex resume <taskId>
+cortex detect <taskId>
+cortex verify --task <taskId> --attempt <attemptId> \
+  --summary "Migration tests pass" \
+  --source test
 ```
 
 ## Troubleshooting
 
-### Common Issues
+### `bun` is not recognized
 
-**"bun: command not found"**
-- Ensure Bun is installed and in your PATH
-- Restart your terminal after installation
+Install Bun, restart the terminal, and confirm that `bun --version` works.
 
-**"Build failed: Cannot find module"**
-- Run `bun install` in the root directory
-- Ensure all dependencies are installed
+### The build cannot find a workspace package
 
-**"Permission denied"**
-- On Linux/macOS, you may need to make scripts executable:
-  ```bash
-  chmod +x packages/*/dist/*.js
-  ```
+Run `bun install` from the repository root before building an individual
+package.
 
-**Database Issues**
-- Database is stored in `~/.cortex/memories.db`
-- If corrupted, you can delete and start fresh:
-  ```bash
-  rm -rf ~/.cortex/memories.db
-  ```
+### Database or project-state issues
 
-## Next Steps
+Cortex stores local state under `.cortex/` for the current project. Inspect the
+active configuration and preserve any handoff data before removing local
+files.
 
-- [Quick Start Guide](./quick-start.md) - Start using Cortex
-- [CLI Usage](../guides/cli-usage.md) - Learn CLI commands
-- [MCP Integration](../guides/mcp-integration.md) - Connect to AI tools
-- [VS Code Extension](../guides/vscode-extension.md) - Use visual interface
+## Next steps
+
+- [Quick start](./quick-start.md)
+- [Examples](./examples.md)
+- [Universal MCP setup](../UNIVERSAL_SETUP.md)
+- [Supported tools](../SUPPORTED_TOOLS.md)
+- [Handoff contract](../architecture/HANDOFF_CONTRACT.md)
+- [Support](../../.github/SUPPORT.md)
 
 ## Updating
 
-To update to the latest version:
+For a source checkout:
 
 ```bash
-cd Cortex
 git pull origin main
 bun install
 bun run build
 ```
 
-## Uninstalling
-
-To remove Cortex:
+For the published CLI, update the global package:
 
 ```bash
-# Remove the repository
-rm -rf Cortex
-
-# Remove user data (optional)
-rm -rf ~/.cortex
-
-# If installed globally (future)
-bun remove -g @cortex/cli
+bun update --global @ecuabyte/cortex-cli
 ```
 
----
+## Uninstalling
 
-**Questions?** Check the [FAQ](../troubleshooting/faq.md) or [open an issue](https://github.com/EcuaByte-lat/Cortex/issues).
+Remove the global CLI if installed:
+
+```bash
+bun remove --global @ecuabyte/cortex-cli
+```
+
+Project state is separate from the package. Remove `.cortex/` only after
+exporting or no longer needing its local records.

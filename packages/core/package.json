@@ -1,7 +1,7 @@
 {
   "name": "@ecuabyte/cortex-core",
   "version": "0.9.0",
-  "description": "Core memory storage and types for Cortex",
+  "description": "Local-first engineering state store and continuity primitives for Cortex",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,8 +20,11 @@
     "test:coverage": "bun test --coverage"
   },
   "keywords": [
-    "ai",
-    "memory",
+    "engineering-state",
+    "handoff",
+    "verification",
+    "provenance",
+    "coding-agents",
     "context",
     "agent",
     "mcp",
@@ -29,6 +32,7 @@
   ],
   "author": "EcuaByte <hello@ecuabyte.com> (https://github.com/EcuaByte-lat)",
   "license": "MIT",
+  "homepage": "https://github.com/EcuaByte-lat/Cortex#readme",
   "publishConfig": {
     "access": "public"
   },

@@ -1,6 +1,7 @@
 {
   "name": "@ecuabyte/cortex-mcp-server",
   "version": "0.9.0",
+  "mcpName": "io.github.EcuaByte-lat/cortex",
   "description": "MCP server exposing Cortex engineering state and handoffs to coding agents",
   "type": "module",
   "bin": {
@@ -16,14 +17,19 @@
   },
   "keywords": [
     "mcp",
-    "ai",
-    "memory",
+    "ai-agents",
+    "coding-agents",
+    "engineering-state",
+    "handoff",
+    "verification",
+    "provenance",
     "context",
     "claude",
     "copilot"
   ],
   "author": "EcuaByte <hello@ecuabyte.com> (https://github.com/EcuaByte-lat)",
   "license": "MIT",
+  "homepage": "https://github.com/EcuaByte-lat/Cortex#readme",
   "publishConfig": {
     "access": "public"
   },

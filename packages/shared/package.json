@@ -1,7 +1,19 @@
 {
   "name": "@ecuabyte/cortex-shared",
   "version": "0.9.0",
+  "description": "Shared types and utilities for Cortex engineering state integrations",
   "type": "module",
+  "keywords": [
+    "engineering-state",
+    "handoff",
+    "coding-agents",
+    "mcp"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/EcuaByte-lat/Cortex#readme",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {

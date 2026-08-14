@@ -8,7 +8,8 @@ body:
       value: |
         💡 **Tip:** Before asking, check if your question is answered in:
         - [Documentation](https://github.com/EcuaByte-lat/Cortex/tree/main/docs)
-        - [FAQ](https://github.com/EcuaByte-lat/Cortex/blob/main/docs/troubleshooting/faq.md)
+        - [Quick Start](https://github.com/EcuaByte-lat/Cortex/blob/main/docs/getting-started/quick-start.md)
+        - [Supported Tools](https://github.com/EcuaByte-lat/Cortex/blob/main/docs/SUPPORTED_TOOLS.md)
         - [Existing Discussions](https://github.com/EcuaByte-lat/Cortex/discussions)
 
   - type: textarea
