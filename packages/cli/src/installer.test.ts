@@ -8,8 +8,10 @@ import {
   installAgentsFile,
   installAll,
   installClaudeHooks,
+  installCodexHooks,
   installCursorRules,
   installForEditor,
+  installOpenCodePlugin,
 } from './installer';
 
 // Mock fs
@@ -408,6 +410,44 @@ describe('Cortex Installer', () => {
       const claudeMd = results.find((r) => r.editor === 'CLAUDE.md');
       expect(claudeMd).toBeDefined();
       expect(claudeMd?.success).toBe(true);
+    });
+  });
+
+  describe('agent bridge adapters', () => {
+    it('installs Codex lifecycle hooks without replacing existing hooks', () => {
+      let writtenContent = '';
+      fsMocks.existsSync.mockImplementation(() => true);
+      fsMocks.readFileSync.mockImplementation(() =>
+        JSON.stringify({ SessionStart: [{ hooks: [{ type: 'command', command: 'existing' }] }] })
+      );
+      fsMocks.writeFileSync.mockImplementation((_: string, content: string) => {
+        writtenContent = content;
+      });
+
+      const result = installCodexHooks({ projectPath: '/tmp/project' });
+      const parsed = JSON.parse(writtenContent);
+
+      expect(result.success).toBe(true);
+      expect(parsed.SessionStart).toHaveLength(2);
+      expect(parsed.PostToolUse[0].hooks[0].command).toContain('cortex bridge ingest');
+      expect(parsed.PostCompact[0].hooks[0].command).toContain('cortex bridge ingest');
+      expect(parsed.SessionEnd[0].hooks[0].timeout).toBe(3);
+    });
+
+    it('writes a project OpenCode plugin for lifecycle capture', () => {
+      let writtenFile = '';
+      let writtenContent = '';
+      fsMocks.writeFileSync.mockImplementation((file: string, content: string) => {
+        writtenFile = file;
+        writtenContent = content;
+      });
+
+      const result = installOpenCodePlugin('/tmp/project');
+
+      expect(result.success).toBe(true);
+      expect(writtenFile).toContain(join('.opencode', 'plugins', 'cortex.ts'));
+      expect(writtenContent).toContain('CortexAgentBridge');
+      expect(writtenContent).toContain('tool.execute.after');
     });
   });
 

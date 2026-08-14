@@ -2,15 +2,18 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import {
-  createEmbeddingProvider,
+  AgentBridge,
   ContinuityStore,
-  renderContinuityHandoffMarkdown,
+  createEmbeddingProvider,
   type Memory,
   MemoryStore,
+  renderContinuityHandoffMarkdown,
   type SemanticSearchResult,
 } from '@ecuabyte/cortex-core';
 import { MEMORY_TYPES } from '@ecuabyte/cortex-shared';
 import { Command } from 'commander';
+import { type AgentProvider, normalizeAgentPayload } from './agent-adapters.js';
+import { parseBridgeInput } from './bridge-input.js';
 import { deriveProjectId, getRepositoryContext } from './continuity.js';
 
 const program = new Command();
@@ -414,7 +417,7 @@ program
 // Install command - auto-configure for all editors
 program
   .command('install')
-  .description('Auto-configure Cortex for AI editors (Cursor, Windsurf, Claude, VS Code, Zed)')
+  .description('Auto-configure Cortex for AI editors and agent lifecycle capture')
   .option('-g, --global', 'Install globally for all projects (default)', true)
   .option('-p, --project [path]', 'Install for current project only')
   .option(
@@ -501,6 +504,13 @@ program
         console.log(`   Path: ${result.path}`);
       }
       console.log('');
+
+      if (!projectPath) {
+        const codexResult = installer.installCodexHooks({ global: true });
+        console.log(codexResult.message);
+        if (codexResult.success) console.log(`   Path: ${codexResult.path}`);
+        console.log('');
+      }
     }
 
     console.log('🎉 Done! Cortex is now integrated with your AI editors.\n');
@@ -568,10 +578,12 @@ program
 program
   .command('start <objective>')
   .description('Start a durable task and agent attempt for the current repository')
-  .option('--acceptance <criterion>', 'Acceptance criterion (repeatable)', (value, previous: string[]) => [
-    ...previous,
-    value,
-  ], [])
+  .option(
+    '--acceptance <criterion>',
+    'Acceptance criterion (repeatable)',
+    (value, previous: string[]) => [...previous, value],
+    []
+  )
   .option('--agent <harness>', 'Agent or harness name', 'cortex-cli')
   .option('--model <model>', 'Model name')
   .option('--version <version>', 'Agent or harness version')
@@ -625,7 +637,9 @@ program
   .option('--status <status>', 'Evidence status', 'current')
   .option('--details <json>', 'Evidence details as JSON')
   .action(async (options) => {
-    const details = options.details ? JSON.parse(options.details) as Record<string, unknown> : undefined;
+    const details = options.details
+      ? (JSON.parse(options.details) as Record<string, unknown>)
+      : undefined;
     const result = await continuityStore.capture({
       taskId: options.task,
       attemptId: options.attempt,
@@ -645,10 +659,12 @@ program
   .requiredOption('--task <taskId>', 'Task identifier')
   .requiredOption('--attempt <attemptId>', 'Attempt identifier')
   .option('--summary <summary>', 'Handoff summary')
-  .option('--next <action>', 'Next action (repeatable)', (value, previous: string[]) => [
-    ...previous,
-    value,
-  ], [])
+  .option(
+    '--next <action>',
+    'Next action (repeatable)',
+    (value, previous: string[]) => [...previous, value],
+    []
+  )
   .action(async (options) => {
     const result = await continuityStore.createHandoff({
       taskId: options.task,
@@ -656,7 +672,13 @@ program
       ...(options.summary ? { summary: options.summary } : {}),
       nextActions: options.next,
     });
-    console.log(JSON.stringify({ handoff: result, markdown: renderContinuityHandoffMarkdown(result) }, null, 2));
+    console.log(
+      JSON.stringify(
+        { handoff: result, markdown: renderContinuityHandoffMarkdown(result) },
+        null,
+        2
+      )
+    );
   });
 
 program
@@ -669,7 +691,9 @@ program
   .option('--status <status>', 'Verification status', 'current')
   .option('--details <json>', 'Verification details as JSON')
   .action(async (options) => {
-    const details = options.details ? JSON.parse(options.details) as Record<string, unknown> : undefined;
+    const details = options.details
+      ? (JSON.parse(options.details) as Record<string, unknown>)
+      : undefined;
     const result = await continuityStore.verify({
       taskId: options.task,
       attemptId: options.attempt,
@@ -691,5 +715,41 @@ program
     });
     console.log(JSON.stringify(result, null, 2));
   });
+
+program
+  .command('bridge')
+  .description('Receive normalized or provider-native agent lifecycle events')
+  .command('ingest')
+  .description('Ingest one JSON event from stdin')
+  .requiredOption('--provider <provider>', 'Agent provider (codex|opencode|claude|cursor|gemini)')
+  .action(async (options) => {
+    try {
+      const provider = options.provider as AgentProvider;
+      if (!['codex', 'opencode', 'claude', 'cursor', 'gemini'].includes(provider)) {
+        throw new Error(`Unsupported agent provider: ${provider}`);
+      }
+
+      const payload = await readJsonStdin();
+      const cwd =
+        (typeof payload['cwd'] === 'string' && payload['cwd']) ||
+        (typeof payload['directory'] === 'string' && payload['directory']) ||
+        process.cwd();
+      const event = normalizeAgentPayload(provider, payload, getRepositoryContext(cwd));
+      const result = await new AgentBridge(continuityStore).ingest(event);
+      console.log(JSON.stringify(result, null, 2));
+    } catch (error) {
+      console.error(
+        `Bridge ingestion failed: ${error instanceof Error ? error.message : String(error)}`
+      );
+      process.exitCode = 1;
+    }
+  });
+
+async function readJsonStdin(): Promise<Record<string, unknown>> {
+  let input = '';
+  process.stdin.setEncoding('utf8');
+  for await (const chunk of process.stdin) input += chunk;
+  return parseBridgeInput(input);
+}
 
 program.parse();

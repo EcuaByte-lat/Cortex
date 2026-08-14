@@ -4,6 +4,36 @@ Cortex is designed to preserve **verified engineering state and handoffs** acros
 
 The goal is not to capture a user's entire AI history. Cortex records the project, task, evidence, decisions, artifacts, verification, and next steps needed to resume software work safely in another session or agent.
 
+## Native Agent Bridge
+
+For automatic continuity capture inside a repository, run:
+
+```bash
+cortex install --project .
+```
+
+The installer preserves existing configuration and adds:
+
+- Codex lifecycle hooks in `.codex/hooks.json`;
+- an OpenCode plugin in `.opencode/plugins/cortex.ts`; and
+- the existing MCP/rules configuration for the supported editors.
+
+The integrations call `cortex bridge ingest`, which writes to the local
+ContinuityStore. Events are deduplicated by provider/session/event identity and
+redacted before storage. The bridge records durable engineering signals rather
+than full prompts, transcripts, or file contents.
+
+To use the bridge with another runtime adapter, provide one JSON event on
+stdin:
+
+```bash
+echo '{"hook_event_name":"UserPromptSubmit","session_id":"demo","prompt":"Run the API tests","cwd":"/path/to/repo"}' \
+  | cortex bridge ingest --provider codex
+```
+
+See [ADR 006](architecture/decisions/006-agent-bridge-ingestion.md) for the
+contract and design boundaries.
+
 ## 🚀 Quick Setup (All Tools)
 
 We provide a utility to generate the configuration for your specific tool.

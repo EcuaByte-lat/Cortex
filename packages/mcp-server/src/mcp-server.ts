@@ -988,7 +988,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           projectId: args['projectId'] as string,
           objective: args['objective'] as string,
           acceptanceCriteria: args['acceptanceCriteria'] as string[] | undefined,
-          repository: args['repository'] as Parameters<ContinuityStore['startTask']>[0]['repository'],
+          repository: args['repository'] as Parameters<
+            ContinuityStore['startTask']
+          >[0]['repository'],
           actor: args['actor'] as Parameters<ContinuityStore['startTask']>[0]['actor'],
           taskId: args['taskId'] as string | undefined,
           attemptId: args['attemptId'] as string | undefined,
@@ -997,9 +999,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case TOOL_NAMES.STATUS: {
-        const result = await continuityStore.resume({ taskId: args?.['taskId'] as string | undefined });
+        const result = await continuityStore.resume({
+          taskId: args?.['taskId'] as string | undefined,
+        });
         return formatOutput(
-          JSON.stringify({ task: result.task, attempt: result.attempt, handoff: result.handoff }, null, 2)
+          JSON.stringify(
+            { task: result.task, attempt: result.attempt, handoff: result.handoff },
+            null,
+            2
+          )
         );
       }
 
@@ -1033,7 +1041,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case TOOL_NAMES.RESUME: {
-        const result = await continuityStore.resume({ taskId: args?.['taskId'] as string | undefined });
+        const result = await continuityStore.resume({
+          taskId: args?.['taskId'] as string | undefined,
+        });
         return formatOutput(JSON.stringify(result, null, 2));
       }
 
