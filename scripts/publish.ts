@@ -24,7 +24,8 @@ import { $ } from 'bun';
 const PACKAGES_DIR = join(import.meta.dir, '..', 'packages');
 
 // Order matters: dependencies must be published first
-const PUBLISH_ORDER = ['shared', 'core', 'cli', 'mcp-server', 'vscode-extension'];
+// The VS Code package is distributed through Marketplace and Open VSX, not npm.
+const PUBLISH_ORDER = ['shared', 'core', 'cli', 'mcp-server'];
 
 interface PackageInfo {
   name: string;
