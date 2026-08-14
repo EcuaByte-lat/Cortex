@@ -4,7 +4,9 @@
  * Custom publish script for Bun workspaces
  *
  * This script resolves workspace: protocol dependencies before publishing
- * because changesets doesn't support Bun's workspace protocol.
+ * because changesets doesn't support Bun's workspace protocol. Authentication
+ * is provided by npm Trusted Publishing (OIDC) in CI, with NPM_TOKEN kept as
+ * a local/legacy fallback.
  *
  * Strategy:
  * 1. Read all package versions
@@ -46,7 +48,7 @@ async function getAllPackages(): Promise<Map<string, PackageInfo>> {
     const npmrcContent = `//registry.npmjs.org/:_authToken=${token}\nregistry=https://registry.npmjs.org/\n`;
     await Bun.write(npmrcPath, npmrcContent);
   } else {
-    console.warn('⚠️ No NPM_TOKEN found! Publishing might fail.');
+    console.log('ℹ️ No NPM_TOKEN found; using npm Trusted Publishing (OIDC).');
   }
 
   const packages = new Map<string, PackageInfo>();
