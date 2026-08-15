@@ -75,6 +75,8 @@ export interface ContinuityEventRecord {
   attemptId?: string;
   summary?: string;
   details?: Record<string, unknown>;
+  source?: EvidenceSource;
+  authority?: EvidenceAuthority;
   status?: EvidenceStatus;
   occurredAt?: string;
   recordedAt: string;

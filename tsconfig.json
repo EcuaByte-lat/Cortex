@@ -44,6 +44,7 @@
     { "path": "./packages/core" },
     { "path": "./packages/cli" },
     { "path": "./packages/mcp-server" },
+    { "path": "./packages/dashboard" },
     { "path": "./packages/vscode-extension" }
   ],
   "include": [],

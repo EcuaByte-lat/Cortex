@@ -85,7 +85,7 @@ export class AIScanWebview {
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media')],
+        localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'dist')],
       }
     );
 
@@ -214,6 +214,11 @@ export class AIScanWebview {
   }
 
   private getHtml(): string {
-    return getContinuityDashboardHtml(this.panel?.webview.cspSource ?? '');
+    const scriptUri = this.panel
+      ? this.panel.webview.asWebviewUri(
+          vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview.js')
+        )
+      : undefined;
+    return getContinuityDashboardHtml(this.panel?.webview.cspSource ?? '', scriptUri?.toString());
   }
 }

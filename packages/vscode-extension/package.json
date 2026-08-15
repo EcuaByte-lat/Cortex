@@ -68,9 +68,12 @@
     "@ecuabyte/cortex-shared": "workspace:^"
   },
   "dependencies": {
+    "@ecuabyte/cortex-dashboard": "workspace:^",
     "@google/generative-ai": "^0.24.0",
     "sql.js": "^1.13.0",
-    "@modelcontextprotocol/sdk": "^1.30.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "contributes": {
     "taskDefinitions": [

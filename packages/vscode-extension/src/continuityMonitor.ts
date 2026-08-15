@@ -88,6 +88,8 @@ interface EventRow {
   attempt_id: string | null;
   summary: string | null;
   details: string | null;
+  source?: EvidenceSource | null;
+  authority?: EvidenceAuthority | null;
   status: EvidenceStatus | null;
   occurred_at: string | null;
   recorded_at: string;
@@ -154,6 +156,8 @@ function toEvent(row: EventRow): ContinuityEventRecord {
     ...(row.attempt_id ? { attemptId: row.attempt_id } : {}),
     ...(row.summary ? { summary: row.summary } : {}),
     ...(row.details ? { details: parseJson<Record<string, unknown>>(row.details) } : {}),
+    ...(row.source ? { source: row.source } : {}),
+    ...(row.authority ? { authority: row.authority } : {}),
     ...(row.status ? { status: row.status } : {}),
     ...(row.occurred_at ? { occurredAt: row.occurred_at } : {}),
     recordedAt: row.recorded_at,

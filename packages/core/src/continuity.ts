@@ -136,6 +136,8 @@ interface EventLogRow {
   attempt_id: string | null;
   summary: string | null;
   details: string | null;
+  source: EvidenceSource | null;
+  authority: EvidenceAuthority | null;
   status: EvidenceStatus | null;
   occurred_at: string | null;
   recorded_at: string;
@@ -213,6 +215,8 @@ function toEventRecord(row: EventLogRow): ContinuityEventRecord {
     ...(row.attempt_id ? { attemptId: row.attempt_id } : {}),
     ...(row.summary ? { summary: row.summary } : {}),
     ...(row.details ? { details: parseJson<Record<string, unknown>>(row.details) } : {}),
+    ...(row.source ? { source: row.source } : {}),
+    ...(row.authority ? { authority: row.authority } : {}),
     ...(row.status ? { status: row.status } : {}),
     ...(row.occurred_at ? { occurredAt: row.occurred_at } : {}),
     recordedAt: row.recorded_at,
@@ -305,6 +309,8 @@ export class ContinuityStore {
         attempt_id TEXT,
         summary TEXT,
         details TEXT,
+        source TEXT,
+        authority TEXT,
         status TEXT,
         occurred_at TEXT,
         recorded_at TEXT NOT NULL,
@@ -316,6 +322,20 @@ export class ContinuityStore {
       CREATE INDEX IF NOT EXISTS continuity_handoffs_task_idx
         ON continuity_handoffs(task_id, created_at DESC);
     `);
+
+    this.ensureEventProvenanceColumns();
+  }
+
+  private ensureEventProvenanceColumns(): void {
+    const columns = this.db.prepare('PRAGMA table_info(continuity_event_log)').all() as Array<{
+      name: string;
+    }>;
+    const names = new Set(columns.map((column) => column.name));
+    if (!names.has('source'))
+      this.db.exec('ALTER TABLE continuity_event_log ADD COLUMN source TEXT');
+    if (!names.has('authority')) {
+      this.db.exec('ALTER TABLE continuity_event_log ADD COLUMN authority TEXT');
+    }
   }
 
   async startTask(
@@ -401,8 +421,8 @@ export class ContinuityStore {
     const result = this.db
       .prepare(
         `INSERT OR IGNORE INTO continuity_event_log
-          (event_id, event_type, session_id, agent, repository, project_id, task_id, attempt_id, summary, details, status, occurred_at, recorded_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          (event_id, event_type, session_id, agent, repository, project_id, task_id, attempt_id, summary, details, source, authority, status, occurred_at, recorded_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         event.eventId,
@@ -415,6 +435,8 @@ export class ContinuityStore {
         event.attemptId ?? null,
         event.summary ?? null,
         event.details ? JSON.stringify(event.details) : null,
+        event.source ?? null,
+        event.authority ?? null,
         event.status ?? null,
         event.occurredAt ?? null,
         event.recordedAt

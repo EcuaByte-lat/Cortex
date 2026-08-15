@@ -63,6 +63,8 @@ export class AgentBridge {
         : {}),
       ...(event.summary ? { summary: this.redact(event.summary) } : {}),
       ...(event.details ? { details: this.redactRecord(event.details) } : {}),
+      ...(event.source ? { source: event.source } : {}),
+      ...(event.authority ? { authority: event.authority } : {}),
       ...(event.status ? { status: event.status } : {}),
       ...(event.occurredAt ? { occurredAt: event.occurredAt } : {}),
       recordedAt,

@@ -11,4 +11,11 @@ describe('Continuity dashboard HTML', () => {
     expect(html).toContain('Open latest handoff');
     expect(html).not.toContain('unpkg.com');
   });
+
+  test('mounts the shared React dashboard from a local webview bundle', () => {
+    const html = getContinuityDashboardHtml('vscode-webview-source', 'vscode-webview-script');
+
+    expect(html).toContain('<div id="root"></div>');
+    expect(html).toContain('src="vscode-webview-script"');
+  });
 });
