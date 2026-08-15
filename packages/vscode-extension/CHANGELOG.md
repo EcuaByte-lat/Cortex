@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.3
+
+### Patch Changes
+
+- [`868a5a8`](https://github.com/EcuaByte-lat/Cortex/commit/868a5a836b86f52de047b300ace24d55865d1a03) Thanks [@aquirozdev](https://github.com/aquirozdev)! - Read local Codex VS Code rollout logs as a live continuity fallback when the editor path does not emit lifecycle hooks.
+
+- [#57](https://github.com/EcuaByte-lat/Cortex/pull/57) [`8f0e715`](https://github.com/EcuaByte-lat/Cortex/commit/8f0e7159dcadc99190c4d254eee8bccf3dd36236) Thanks [@aquirozdev](https://github.com/aquirozdev)! - Extract the continuity dashboard into a shared React surface with validated Zod messages, stable task selection, evidence provenance, and migration-safe event metadata persistence.
+
 ## 0.9.2
 
 ### Patch Changes
