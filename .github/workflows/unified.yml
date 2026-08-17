@@ -156,7 +156,7 @@ jobs:
       # npm Trusted Publishing uses OIDC instead of a long-lived NPM_TOKEN.
       # npm CLI 11.5.1+ and Node.js 22.14+ are required for this flow.
       - name: Setup Node.js (for npm Trusted Publishing)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
