@@ -169,7 +169,7 @@ jobs:
 
       - name: Create Release PR or Publish
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           # Use custom publish script that properly resolves workspace: protocol
           # See: https://github.com/oven-sh/bun/issues/24687
