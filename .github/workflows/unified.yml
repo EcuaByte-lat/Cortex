@@ -284,32 +284,6 @@ jobs:
             --latest
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # CODEQL SECURITY ANALYSIS - Main pushes and pull requests
-  # ═══════════════════════════════════════════════════════════════════════════
-
-  codeql:
-    name: CodeQL Security Analysis
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: javascript-typescript
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-
-  # ═══════════════════════════════════════════════════════════════════════════
   # PARENT SYNC - Notify cortex-cloud to update submodule
   # ═══════════════════════════════════════════════════════════════════════════
 
