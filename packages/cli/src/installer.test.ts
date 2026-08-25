@@ -166,11 +166,11 @@ describe('Cortex Installer', () => {
       expect(writtenPath).toContain('AGENTS.md');
     });
 
-    it('should always overwrite existing files', () => {
+    it('should preserve existing files unless forced', () => {
       fsMocks.existsSync.mockImplementation(() => true);
       const result = installAgentsFile('/test/project');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('Created');
+      expect(result.message).toContain('Preserved');
     });
 
     it('should overwrite if forced', () => {
@@ -220,11 +220,11 @@ describe('Cortex Installer', () => {
       expect(writtenContent).toContain('Evidence-First');
     });
 
-    it('should always overwrite existing files', () => {
+    it('should preserve existing files unless forced', () => {
       fsMocks.existsSync.mockImplementation(() => true);
       const result = installCursorRules('/test/project');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('Created');
+      expect(result.message).toContain('Preserved');
     });
 
     it('should overwrite if forced', () => {
@@ -327,7 +327,7 @@ describe('Cortex Installer', () => {
       expect(result.success).toBe(true);
       const parsed = JSON.parse(writtenContent);
       expect(parsed.hooks.PostToolUse).toHaveLength(1);
-      expect(parsed.hooks.PostToolUse[0].command).toContain('cortex-mcp-server');
+      expect(parsed.hooks.PostToolUse[0].hooks[0].command).toContain('cortex bridge ingest');
     });
 
     it('should create hooks structure if missing', () => {
@@ -352,7 +352,14 @@ describe('Cortex Installer', () => {
       // Simulate existing hook
       fsMocks.readFileSync.mockImplementation(() =>
         JSON.stringify({
-          hooks: { PostToolUse: [{ command: '... cortex-mcp-server ...' }] },
+          hooks: {
+            PostToolUse: [
+              {
+                matcher: 'Write|Edit',
+                hooks: [{ type: 'command', command: 'cortex bridge ingest --provider claude' }],
+              },
+            ],
+          },
         })
       );
       fsMocks.writeFileSync.mockImplementation((_: string, c: string) => {
@@ -414,24 +421,12 @@ describe('Cortex Installer', () => {
   });
 
   describe('agent bridge adapters', () => {
-    it('installs Codex lifecycle hooks without replacing existing hooks', () => {
-      let writtenContent = '';
-      fsMocks.existsSync.mockImplementation(() => true);
-      fsMocks.readFileSync.mockImplementation(() =>
-        JSON.stringify({ SessionStart: [{ hooks: [{ type: 'command', command: 'existing' }] }] })
-      );
-      fsMocks.writeFileSync.mockImplementation((_: string, content: string) => {
-        writtenContent = content;
-      });
-
+    it('uses project instructions for Codex instead of inventing an unsupported hooks file', () => {
       const result = installCodexHooks({ projectPath: '/tmp/project' });
-      const parsed = JSON.parse(writtenContent);
 
       expect(result.success).toBe(true);
-      expect(parsed.SessionStart).toHaveLength(2);
-      expect(parsed.PostToolUse[0].hooks[0].command).toContain('cortex bridge ingest');
-      expect(parsed.PostCompact[0].hooks[0].command).toContain('cortex bridge ingest');
-      expect(parsed.SessionEnd[0].hooks[0].timeout).toBe(3);
+      expect(result.path).toContain('AGENTS.md');
+      expect(result.message).toContain('MCP');
     });
 
     it('writes a project OpenCode plugin for lifecycle capture', () => {

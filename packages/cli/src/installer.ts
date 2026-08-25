@@ -10,7 +10,8 @@
  * - JetBrains: (MCP Beta - manual for now)
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir, platform } from 'node:os';
 import { dirname, join } from 'node:path';
 
@@ -254,7 +255,13 @@ export function installAgentsFile(
   const fileName = options.type === 'claude' ? 'CLAUDE.md' : 'AGENTS.md';
   const filePath = join(projectPath, fileName);
 
-  // Always overwrite to keep files up to date with latest best practices
+  if (existsSync(filePath) && !options.force) {
+    return {
+      success: true,
+      message: `ℹ️ Preserved existing ${fileName}`,
+      path: filePath,
+    };
+  }
 
   const claudeContent = `# Claude Code Instructions
 
@@ -485,7 +492,13 @@ export function installCursorRules(
   const fileName = '.cursorrules';
   const filePath = join(projectPath, fileName);
 
-  // Always overwrite to keep files up to date with latest best practices
+  if (existsSync(filePath) && !_options.force) {
+    return {
+      success: true,
+      message: 'ℹ️ Preserved existing .cursorrules',
+      path: filePath,
+    };
+  }
 
   const content = `# Cursor Rules - Cortex Engineering State
 
@@ -597,7 +610,7 @@ Cortex preserves evidence-backed engineering state for reliable handoffs across 
     if (!existsSync(copilotDir)) {
       mkdirSync(copilotDir, { recursive: true });
     }
-    writeFileSync(copilotPath, copilotContent);
+    if (!existsSync(copilotPath)) writeFileSync(copilotPath, copilotContent);
     results.push({
       tool: 'Copilot',
       success: true,
@@ -644,7 +657,7 @@ EXPLORE → PLAN → CODE → VERIFY → COMMIT
 `;
 
   try {
-    writeFileSync(windsurfPath, windsurfContent);
+    if (!existsSync(windsurfPath)) writeFileSync(windsurfPath, windsurfContent);
     results.push({
       tool: 'Windsurf',
       success: true,
@@ -702,7 +715,7 @@ EXPLORE → PLAN → CODE → VERIFY → COMMIT
     if (!existsSync(cursorRulesDir)) {
       mkdirSync(cursorRulesDir, { recursive: true });
     }
-    writeFileSync(cursorMdcPath, cursorMdcContent);
+    if (!existsSync(cursorMdcPath)) writeFileSync(cursorMdcPath, cursorMdcContent);
     results.push({
       tool: 'Cursor MDC',
       success: true,
@@ -742,7 +755,7 @@ EXPLORE → PLAN → CODE → VERIFY → COMMIT
     if (!existsSync(vscodeDir)) {
       mkdirSync(vscodeDir, { recursive: true });
     }
-    writeFileSync(codyPath, JSON.stringify(codyConfig, null, 2));
+    if (!existsSync(codyPath)) writeFileSync(codyPath, JSON.stringify(codyConfig, null, 2));
     results.push({ tool: 'Cody', success: true, message: '✅ Created cody.json', path: codyPath });
   } catch (error) {
     results.push({
@@ -774,23 +787,35 @@ export function installClaudeHooks(
 
     const hooks = existingConfig['hooks'] as Record<string, unknown[]>;
 
-    // PostToolUse hook for auto-memory
-    if (!hooks['PostToolUse']) {
-      hooks['PostToolUse'] = [];
-    }
+    const lifecycleEvents = [
+      'SessionStart',
+      'UserPromptSubmit',
+      'PostToolUse',
+      'PostToolUseFailure',
+      'PreCompact',
+      'PostCompact',
+      'Stop',
+      'SessionEnd',
+    ];
 
-    // Check if cortex hook already exists
-    const postHooks = hooks['PostToolUse'] as Array<{ matcher?: string; command?: string }>;
-    const hasCorTexHook = postHooks.some(
-      (h) => h.command?.includes('cortex') || h.matcher?.includes('cortex')
-    );
-
-    if (!hasCorTexHook) {
-      postHooks.push({
-        matcher: 'Write|Edit|Create|Bash',
-        command:
-          'echo "Action completed: $TOOL_NAME" | bunx @ecuabyte/cortex-mcp-server --auto-save 2>/dev/null || true',
-      });
+    for (const event of lifecycleEvents) {
+      const entries = Array.isArray(hooks[event]) ? (hooks[event] as unknown[]) : [];
+      const hasBridge = entries.some((entry) => JSON.stringify(entry).includes('bridge ingest'));
+      if (!hasBridge) {
+        entries.push({
+          matcher:
+            event === 'PostToolUse' || event === 'PostToolUseFailure'
+              ? 'Write|Edit|Create|Bash|Read|Grep|Glob'
+              : '.*',
+          hooks: [
+            {
+              type: 'command',
+              command: 'cortex bridge ingest --provider claude >/dev/null 2>&1 || true',
+            },
+          ],
+        });
+      }
+      hooks[event] = entries;
     }
 
     writeConfigFile(configPath, existingConfig);
@@ -809,54 +834,85 @@ export function installClaudeHooks(
   }
 }
 
-export function installCodexHooks(
+export function installCodexIntegration(
   options: { global?: boolean; projectPath?: string } = { global: true }
 ): { success: boolean; message: string; path: string } {
-  const configPath = options.global
-    ? join(HOME, '.codex', 'hooks.json')
-    : options.projectPath
-      ? join(options.projectPath, '.codex', 'hooks.json')
-      : join(HOME, '.codex', 'hooks.json');
+  const configPath = join(HOME, '.codex', 'config.toml');
 
   try {
-    const config = readConfigFile(configPath);
-    const hooks = config as Record<string, unknown>;
-    const bridgeCommand = 'cortex bridge ingest --provider codex';
-    const events: Array<{ name: string; matcher?: string }> = [
-      { name: 'SessionStart' },
-      { name: 'UserPromptSubmit' },
-      { name: 'PostToolUse', matcher: 'Bash|apply_patch|Edit|Write' },
-      { name: 'PostToolUseFailure', matcher: 'Bash|apply_patch|Edit|Write' },
-      { name: 'PreCompact' },
-      { name: 'PostCompact' },
-      { name: 'SessionEnd' },
-    ];
-
-    for (const event of events) {
-      const entries = Array.isArray(hooks[event.name]) ? (hooks[event.name] as unknown[]) : [];
-      const hasBridge = entries.some((entry) => JSON.stringify(entry).includes(bridgeCommand));
-      if (!hasBridge) {
-        entries.push({
-          ...(event.matcher ? { matcher: event.matcher } : {}),
-          hooks: [
-            {
-              type: 'command',
-              command: bridgeCommand,
-              ...(event.name === 'SessionEnd' ? { timeout: 3 } : {}),
-            },
-          ],
-        });
-      }
-      hooks[event.name] = entries;
+    // Codex exposes a stable MCP registration command. Its lifecycle hook
+    // surface is not part of the public CLI contract, so never write an
+    // invented hooks.json file. AGENTS.md plus Git hooks provide the
+    // provider-neutral automatic capture path for project installs.
+    if (!options.global && options.projectPath) {
+      return {
+        success: true,
+        message: '✅ Codex project instructions will use the shared Cortex MCP server',
+        path: join(options.projectPath, 'AGENTS.md'),
+      };
     }
 
-    writeConfigFile(configPath, config);
-    return { success: true, message: '✅ Codex Agent Bridge hooks configured', path: configPath };
+    execFileSync('codex', ['mcp', 'add', 'cortex', '--', 'bunx', '@ecuabyte/cortex-mcp-server'], {
+      stdio: 'ignore',
+    });
+    return { success: true, message: '✅ Codex MCP integration configured', path: configPath };
   } catch (error) {
     return {
       success: false,
-      message: `❌ Failed to configure Codex hooks: ${error instanceof Error ? error.message : String(error)}`,
+      message: `⚠️ Codex MCP integration skipped: ${error instanceof Error ? error.message : String(error)}`,
       path: configPath,
+    };
+  }
+}
+
+/** @deprecated Use installCodexIntegration. */
+export const installCodexHooks = installCodexIntegration;
+
+export function installGitHooks(projectPath: string): {
+  success: boolean;
+  message: string;
+  path: string;
+} {
+  const hooksDir = join(projectPath, '.cortex', 'hooks');
+  const hookNames = ['post-commit', 'post-checkout', 'post-merge', 'pre-push'];
+
+  try {
+    mkdirSync(hooksDir, { recursive: true });
+    for (const hookName of hookNames) {
+      const hookPath = join(hooksDir, hookName);
+      const script = [
+        '#!/bin/sh',
+        '# Managed by Cortex. Capture Git evidence without blocking developer workflows.',
+        'set +e',
+        'CORTEX_BIN="$CORTEX_BIN"',
+        'if [ -z "$CORTEX_BIN" ]; then CORTEX_BIN=cortex; fi',
+        'COMMIT="$(git rev-parse HEAD 2>/dev/null)"',
+        'if command -v "$CORTEX_BIN" >/dev/null 2>&1; then',
+        `  printf '%s\\n' '{"hook":"${hookName}","event_id":"'"$COMMIT"'","commit":"'"$COMMIT"'"}' | "$CORTEX_BIN" bridge ingest --provider git >/dev/null 2>&1`,
+        'elif command -v bun >/dev/null 2>&1 && [ -f packages/cli/src/cli.ts ]; then',
+        `  printf '%s\\n' '{"hook":"${hookName}","event_id":"'"$COMMIT"'","commit":"'"$COMMIT"'"}' | bun run packages/cli/src/cli.ts bridge ingest --provider git >/dev/null 2>&1`,
+        'fi',
+        'exit 0',
+        '',
+      ].join('\n');
+      writeFileSync(hookPath, script);
+      chmodSync(hookPath, 0o755);
+    }
+
+    execFileSync('git', ['-C', projectPath, 'config', 'core.hooksPath', '.cortex/hooks'], {
+      stdio: 'ignore',
+    });
+
+    return {
+      success: true,
+      message: '✅ Git evidence hooks configured (commit, checkout, merge, push)',
+      path: hooksDir,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `⚠️ Git hooks skipped: ${error instanceof Error ? error.message : String(error)}`,
+      path: hooksDir,
     };
   }
 }
@@ -916,6 +972,13 @@ export const CortexAgentBridge: Plugin = async ({ directory }) => ({
 `;
 
   try {
+    if (existsSync(pluginPath)) {
+      return {
+        success: true,
+        message: 'ℹ️ Preserved existing OpenCode plugin',
+        path: pluginPath,
+      };
+    }
     writeFileSync(pluginPath, content);
     return {
       success: true,
@@ -971,6 +1034,12 @@ export function installAll(
       ...claudeResult,
     });
 
+    const claudeHooksResult = installClaudeHooks({
+      global: false,
+      projectPath: options.projectPath,
+    });
+    results.push({ editor: 'Claude lifecycle hooks', ...claudeHooksResult });
+
     // Create native rule files for ALL AI tools
     const universalResults = installUniversalRules(options.projectPath);
     for (const result of universalResults.results) {
@@ -982,11 +1051,17 @@ export function installAll(
       });
     }
 
-    const codexResult = installCodexHooks({ projectPath: options.projectPath, global: false });
-    results.push({ editor: 'Codex hooks', ...codexResult });
+    const codexResult = installCodexIntegration({
+      projectPath: options.projectPath,
+      global: false,
+    });
+    results.push({ editor: 'Codex integration', ...codexResult });
 
     const openCodeResult = installOpenCodePlugin(options.projectPath);
     results.push({ editor: 'OpenCode plugin', ...openCodeResult });
+
+    const gitHooksResult = installGitHooks(options.projectPath);
+    results.push({ editor: 'Git evidence hooks', ...gitHooksResult });
   }
 
   const success = results.filter((r) => r.success).length;
@@ -1047,7 +1122,9 @@ export default {
   installCursorRules,
   installUniversalRules,
   installClaudeHooks,
+  installCodexIntegration,
   installCodexHooks,
+  installGitHooks,
   installOpenCodePlugin,
   installAll,
   getEditorConfigs,

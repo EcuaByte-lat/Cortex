@@ -6,7 +6,7 @@ import type {
   RepositoryContext,
 } from '@ecuabyte/cortex-shared';
 
-export type AgentProvider = 'codex' | 'opencode' | 'claude' | 'cursor' | 'gemini';
+export type AgentProvider = 'codex' | 'opencode' | 'claude' | 'cursor' | 'gemini' | 'git';
 
 export function normalizeAgentPayload(
   provider: AgentProvider,
@@ -44,7 +44,11 @@ export function normalizeAgentPayload(
     ...(type === 'prompt.submitted' && summary ? { objective: summary } : {}),
     ...(toolName ? { details: { toolName } } : {}),
     ...(evidenceKindFor(type, toolName) ? { evidenceKind: evidenceKindFor(type, toolName) } : {}),
-    ...(type === 'prompt.submitted' ? { source: 'human' } : { source: 'tool' }),
+    ...(provider === 'git'
+      ? { source: 'git', authority: 'observed' }
+      : type === 'prompt.submitted'
+        ? { source: 'human' }
+        : { source: 'tool' }),
     ...(stringValue(payload['timestamp']) ? { occurredAt: stringValue(payload['timestamp']) } : {}),
   };
 
@@ -56,6 +60,10 @@ function normalizeEventType(
   nativeType: string,
   payload: Record<string, unknown>
 ): AgentEventType {
+  if (provider === 'git') {
+    return 'command.completed';
+  }
+
   if (provider === 'opencode') {
     switch (nativeType) {
       case 'session.created':
@@ -118,6 +126,12 @@ function evidenceKindFor(
   return undefined;
 }
 
+function gitSummary(nativeType: string, payload: Record<string, unknown>): string | undefined {
+  const commit = stringValue(payload['commit']) ?? stringValue(payload['newRef']);
+  if (commit) return `Git ${nativeType}: ${commit}`;
+  return nativeType ? `Git ${nativeType}` : undefined;
+}
+
 function summarize(
   type: AgentEventType,
   payload: Record<string, unknown>,
@@ -132,6 +146,13 @@ function summarize(
       stringValue(payload['text']) ??
       stringValue(properties['prompt']) ??
       'Agent prompt submitted'
+    );
+  }
+
+  if (payload['provider'] === 'git' || payload['hook']) {
+    return gitSummary(
+      stringValue(payload['type']) ?? stringValue(payload['hook']) ?? 'event',
+      payload
     );
   }
 

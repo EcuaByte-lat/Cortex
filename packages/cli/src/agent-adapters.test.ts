@@ -66,4 +66,22 @@ describe('agent adapters', () => {
     expect(event.evidenceKind).toBe('file_change');
     expect(event.summary).toContain('src/bridge.ts');
   });
+
+  test('normalizes a Git hook into redaction-safe repository evidence', () => {
+    const event = normalizeAgentPayload(
+      'git',
+      {
+        hook: 'post-commit',
+        event_id: 'abc123',
+        commit: 'abc123',
+      },
+      repository
+    );
+
+    expect(event.type).toBe('command.completed');
+    expect(event.sessionId).toBe('unknown-session');
+    expect(event.source).toBe('git');
+    expect(event.authority).toBe('observed');
+    expect(event.summary).toBe('Git post-commit: abc123');
+  });
 });

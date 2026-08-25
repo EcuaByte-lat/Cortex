@@ -425,7 +425,7 @@ program
     'Install for specific editor only (cursor|windsurf|claude|vscode|zed)'
   )
   .option('--agents', 'Also create AGENTS.md file in project')
-  .option('--hooks', 'Also configure Claude Code hooks for auto-memory')
+  .option('--hooks', 'Also configure lifecycle hooks (enabled automatically for project installs)')
   .option('--list', 'List detected editors and their config paths')
   .action(async (options) => {
     const installer = await import('./installer.js');
@@ -496,7 +496,8 @@ program
       console.log('');
     }
 
-    // Configure Claude hooks
+    // Configure explicit lifecycle hooks. Project installs already include them
+    // through installAll; this flag preserves the global opt-in behavior.
     if (options.hooks) {
       const result = installer.installClaudeHooks({ global: isGlobal, projectPath });
       console.log(result.message);
@@ -506,7 +507,7 @@ program
       console.log('');
 
       if (!projectPath) {
-        const codexResult = installer.installCodexHooks({ global: true });
+        const codexResult = installer.installCodexIntegration({ global: true });
         console.log(codexResult.message);
         if (codexResult.success) console.log(`   Path: ${codexResult.path}`);
         console.log('');
@@ -721,11 +722,14 @@ program
   .description('Receive normalized or provider-native agent lifecycle events')
   .command('ingest')
   .description('Ingest one JSON event from stdin')
-  .requiredOption('--provider <provider>', 'Agent provider (codex|opencode|claude|cursor|gemini)')
+  .requiredOption(
+    '--provider <provider>',
+    'Agent provider (codex|opencode|claude|cursor|gemini|git)'
+  )
   .action(async (options) => {
     try {
       const provider = options.provider as AgentProvider;
-      if (!['codex', 'opencode', 'claude', 'cursor', 'gemini'].includes(provider)) {
+      if (!['codex', 'opencode', 'claude', 'cursor', 'gemini', 'git'].includes(provider)) {
         throw new Error(`Unsupported agent provider: ${provider}`);
       }
 
