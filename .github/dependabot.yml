@@ -6,9 +6,6 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    labels:
-      - "dependencies"
-      - "ci"
     commit-message:
       prefix: "ci(deps)"
 
@@ -19,8 +16,6 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    labels:
-      - "dependencies"
     open-pull-requests-limit: 5
     commit-message:
       prefix: "deps"
@@ -40,7 +35,3 @@ updates:
         patterns:
           - "@types/*"
           - "typescript"
-    ignore:
-      # Ignore major updates - these require manual review
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
