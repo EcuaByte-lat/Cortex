@@ -1,6 +1,9 @@
-# Cortex Primitives
+# Cortex Compatibility Primitives
 
-This directory contains detailed documentation for each Cortex primitive.
+This directory contains the legacy `ctx/*` compatibility primitives. They are
+still supported by the core package, but they are not the main product model.
+For new work, use the [handoff contract](../HANDOFF_CONTRACT.md) and the
+continuity lifecycle.
 
 ## Core Primitives
 
@@ -11,6 +14,9 @@ This directory contains detailed documentation for each Cortex primitive.
 | ctx/route | [route.md](./route.md) | Intelligent routing |
 | ctx/guard | [guard.md](./guard.md) | Privacy filtering |
 | ctx/fuse | [fuse.md](./fuse.md) | Combine sources |
+
+The continuity layer composes these primitives into project-scoped tasks,
+attempts, evidence, artifacts, verification, and handoffs.
 
 ## Future Primitives (Reserved)
 

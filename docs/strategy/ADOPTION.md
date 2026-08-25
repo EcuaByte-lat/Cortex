@@ -1,7 +1,7 @@
 # Cortex Adoption and Compounding Strategy
 
 **Status:** Working operating model
-**Updated:** 2026-08-14
+**Updated:** 2026-08-25
 **Scope:** How Cortex becomes increasingly useful and difficult to remove without relying on proprietary lock-in.
 
 ## Adoption thesis

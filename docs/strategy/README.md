@@ -2,6 +2,10 @@
 
 This directory is the canonical product and go-to-market reference for Cortex.
 
+If a README, implementation detail, or integration proposal conflicts with the
+documents here, update the public documentation or the code rather than
+creating a third product story.
+
 ## Current thesis
 
 > Cortex is a local-first, evidence-backed state plane that lets humans and coding agents resume software work safely across sessions, tools, vendors, and repositories.
@@ -15,6 +19,7 @@ task -> attempt -> branch/commit -> evidence -> decision -> artifact -> verifica
 ## Canonical documents
 
 - [Product direction](./PRODUCT_DIRECTION.md) — product boundary, vocabulary, principles, buyer, and business hypothesis.
+- [Roadmap](./ROADMAP.md) — phase order, automation surfaces, exit criteria, metrics, and non-goals.
 - [Market research](./MARKET_RESEARCH.md) — public evidence, competitors, standards, risks, and the limits of what is proven.
 - [Distribution](./DISTRIBUTION.md) — channel sequence and repository-native growth loops.
 - [Adoption and compounding](./ADOPTION.md) — how Cortex becomes useful first, habitual second, and operationally necessary later.
@@ -28,6 +33,8 @@ task -> attempt -> branch/commit -> evidence -> decision -> artifact -> verifica
 5. A record without source, scope, freshness, and authority is a hint, not project truth.
 6. Distribution work must be tied to a measurable activation or retention event.
 7. Product claims must distinguish public evidence, vendor-reported metrics, and Cortex hypotheses.
+8. Lifecycle hooks and Git are capture surfaces; MCP is the query/action surface; the continuity record remains the canonical product state.
+9. Provider integrations must degrade gracefully. Cortex capture must never block an agent, commit, push, or review workflow.
 
 ## Current north-star metric
 

@@ -2,7 +2,7 @@
 
 **Status:** Implemented baseline; evolving contract
 **Version:** 0.1 draft
-**Updated:** 2026-08-14
+**Updated:** 2026-08-25
 
 This document defines the product contract for a reliable engineering handoff. It is intentionally narrower than a universal memory protocol. The implementation may begin with a projection over the current `Memory` store, but the domain vocabulary must remain stable as storage evolves.
 
@@ -77,13 +77,17 @@ New Git state, test results, explicit human decisions, or contradictory evidence
 - External model or embedding calls must be explicit and observable.
 - Complete conversations and secrets must not be captured by default.
 
-## Lifecycle
+## Lifecycle and automation
 
 ```text
-start -> capture -> handoff -> resume -> verify -> supersede/archive
+session/prompt -> automatic event capture -> handoff -> resume -> verify -> supersede/archive
 ```
 
-The local core, CLI, and MCP server implement the initial lifecycle. Concurrent access, import/export rebuilding, and provider-specific automation remain roadmap work.
+The local core, CLI, and MCP server implement the lifecycle. Claude hooks,
+OpenCode plugin capture, Codex MCP/project instructions, and fail-open Git
+evidence hooks feed the same continuity record. Provider-specific event
+coverage, CI/PR verification, and shared synchronization remain staged work;
+see [ROADMAP.md](../strategy/ROADMAP.md).
 
 ## Non-goals
 

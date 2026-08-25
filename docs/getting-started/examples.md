@@ -32,7 +32,7 @@ cortex capture --task <taskId> --attempt <attemptId> \
 cortex capture --task <taskId> --attempt <attemptId> \
   --kind blocker \
   --summary "The staging issuer is missing the new audience claim" \
-  --source test
+  --source ci
 ```
 
 Use the source to make later verification and review meaningful. Never record
@@ -71,7 +71,7 @@ Record verification from a concrete source such as a test command or CI check:
 ```bash
 cortex verify --task <taskId> --attempt <attemptId> \
   --summary "Auth integration tests pass on the staging configuration" \
-  --source test
+  --source ci
 ```
 
 Use the [handoff contract](../architecture/HANDOFF_CONTRACT.md) for the

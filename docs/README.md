@@ -2,6 +2,21 @@
 
 This page defines where to look for each kind of truth.
 
+## Start here
+
+Cortex connects agent lifecycle events and engineering evidence into portable,
+verifiable task handoffs:
+
+```text
+intent -> attempt -> changes -> evidence -> verification -> handoff -> next step
+```
+
+- Installing or using Cortex: [quick start](./getting-started/quick-start.md)
+- Understanding the product: [strategy](./strategy/README.md)
+- Implementing the next slice: [roadmap](./strategy/ROADMAP.md)
+- Understanding the data contract: [handoff contract](./architecture/HANDOFF_CONTRACT.md)
+- Adding an agent or editor integration: [universal setup](./UNIVERSAL_SETUP.md) and [supported tools](./SUPPORTED_TOOLS.md)
+
 ## Authority order
 
 1. **Code** — what is actually implemented.
@@ -23,6 +38,10 @@ This page defines where to look for each kind of truth.
 - [Universal setup](./UNIVERSAL_SETUP.md)
 - [Development](./DEVELOPMENT.md)
 - [CI/CD integration](./CI_CD_INTEGRATION.md)
+
+The repository is open source and local-first. A hosted account is never
+required for the first useful handoff; shared synchronization and governance
+are later product layers.
 
 ## Documentation status labels
 

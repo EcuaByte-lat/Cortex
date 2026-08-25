@@ -1,7 +1,7 @@
 # Cortex Dashboard Research
 
-**Date:** 2026-08-14
-**Status:** Research complete; implementation pending product-direction approval
+**Date:** 2026-08-25
+**Status:** Research complete; continuity cockpit exists, hardening and evidence-first prioritization remain
 
 ## Research question
 
@@ -15,13 +15,13 @@ Cortex should become a local-first **continuity cockpit** for the active enginee
 task -> active attempt -> live events -> evidence -> repository state -> next safe action
 ```
 
-The default view should combine a compact task header, a live activity timeline, an evidence/verification summary, and a contextual inspector. A graph or “AI radar” can be optional later, but it should not be the primary surface. The current dashboard is centered on AI project scanning, generic counters, and a memory feed; that does not represent the current handoff contract or the highest-value user decision.
+The default view should combine a compact task header, a live activity timeline, an evidence/verification summary, and a contextual inspector. A graph or “AI radar” can be optional later, but it should not be the primary surface. The legacy scan view remains useful for discovery, while the continuity cockpit is the product surface for the active task.
 
 ## Repository findings
 
 ### Current UI mismatch
 
-`packages/vscode-extension/src/aiScanWebview.ts` currently presents:
+`packages/vscode-extension/src/aiScanWebview.ts` remains the legacy scan surface and presents:
 
 - a project-analysis header;
 - generic coverage, memory, file, and “guardian” counters;
@@ -59,7 +59,7 @@ The shared event model also already has the beginnings of a live feed:
 - `session.idle`
 - `session.ended`
 
-The `AgentBridge` normalizes these events into continuity evidence, but the VS Code dashboard is not yet consuming that lifecycle as its primary source of truth. The current extension wiring streams memories and scan status instead.
+The `AgentBridge` normalizes these events into continuity evidence, and the continuity cockpit consumes that lifecycle. The remaining work is to make the cockpit the default entry point, remove misleading generic counters, and harden freshness, CSP, and DOM-safe rendering.
 
 ### Important implementation constraints
 

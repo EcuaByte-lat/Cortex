@@ -1,7 +1,7 @@
 # Cortex Distribution Strategy
 
 **Status:** Working distribution plan
-**Updated:** 2026-08-14
+**Updated:** 2026-08-25
 **Principle:** Distribute Cortex through the places where engineering state is created, reviewed, and resumed.
 
 ## Distribution thesis

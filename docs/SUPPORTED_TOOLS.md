@@ -8,14 +8,16 @@ These editors can be configured by the **Auto-Installer**. The support level des
 
 | Editor | Support Level | Config Method |
 |--------|---------------|---------------|
-| **Cursor** | ⭐ Premium | `bunx @ecuabyte/cortex-mcp-server generate-config --target cursor` |
-| **Windsurf** | ⭐ Premium | `bunx @ecuabyte/cortex-mcp-server generate-config --target windsurf` |
-| **Antigravity IDE** | ⭐ Premium | `bunx @ecuabyte/cortex-mcp-server generate-config --target antigravity` |
-| **Gemini CLI** | ⭐ Premium | `bunx @ecuabyte/cortex-mcp-server generate-config --target gemini` |
-| **VS Code** | ⭐ Native | [Extension](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode) or MCP |
-| **Claude Desktop** | ⭐ Full | `bunx @ecuabyte/cortex-mcp-server generate-config --target claude-desktop` |
-| **Claude Code** | ⭐ Experimental | `bunx @ecuabyte/cortex-mcp-server generate-config --target claude` |
-| **Zed** | 🟢 Standard | `bunx @ecuabyte/cortex-mcp-server generate-config --target zed` |
+| **Cursor** | MCP + fallback adapter | `cortex install --project .` |
+| **Windsurf** | MCP | `cortex install --project .` |
+| **Antigravity IDE** | MCP | `cortex install --project .` |
+| **Gemini CLI** | MCP + bridge adapter | `cortex install --project .` |
+| **VS Code** | Native extension + MCP | [Extension](https://marketplace.visualstudio.com/items?itemName=EcuaByte.cortex-vscode) |
+| **Claude Desktop** | MCP | `cortex install --editor claude-desktop` |
+| **Claude Code** | MCP + lifecycle hooks | `cortex install --project .` |
+| **Codex CLI** | MCP + `AGENTS.md` + Git evidence hooks | `cortex setup` |
+| **OpenCode** | MCP + project plugin | `cortex install --project .` |
+| **Zed** | MCP | `cortex install --project .` |
 
 ## 🔌 MCP Handoff Support
 

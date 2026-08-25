@@ -13,7 +13,7 @@
   </p>
 </div>
 
-Cortex is a local-first, MCP-native engineering state plane for coding agents. It links tasks, attempts, evidence, decisions, artifacts, verification, and handoffs so a human or another agent can continue from the latest trustworthy state.
+Cortex is an open-source, local-first task reliability layer for agentic software engineering. It links tasks, attempts, evidence, decisions, artifacts, verification, and handoffs so a human or another agent can continue from the latest trustworthy state.
 
 ```text
 task → attempt → evidence → decision → artifact → verification → handoff
@@ -39,9 +39,26 @@ Coding work is scattered across chat sessions, branches, issue comments, Markdow
 | MCP server | Project-scoped context plus the continuity tools `cortex_start`, `cortex_capture`, `cortex_handoff`, `cortex_resume`, `cortex_detect`, and `cortex_verify` |
 | VS Code | Project scanning, context records, tool discovery, model-assisted analysis, and MCP setup |
 | Storage | Local SQLite with FTS5 search and project isolation |
-| Agent bridge | Codex and OpenCode lifecycle adapters that capture high-signal events with deduplication and redaction |
+| Agent automation | Claude lifecycle hooks, Codex MCP/project instructions, OpenCode plugin capture, and fail-open Git evidence hooks |
 
 See the [capability matrix](./docs/SUPPORTED_TOOLS.md) for transport and editor-specific support. The lifecycle is implemented in the CLI/MCP foundation; integrations are intentionally tracked separately from the core record.
+
+## Automatic continuity
+
+Run `cortex setup` once in a repository. Cortex configures the available MCP
+clients and project instructions, then installs fail-open capture surfaces:
+
+| Surface | Role |
+| --- | --- |
+| Claude Code hooks | Capture session, prompt, tool, compaction, and end events |
+| Codex | Register Cortex as MCP and provide project-level instructions |
+| OpenCode plugin | Capture native session and tool lifecycle events |
+| Git hooks | Record commit, checkout, merge, and push evidence |
+| VS Code | Show the continuity cockpit and active task state |
+
+Capture never blocks an agent, commit, or push. Cortex stores selected
+engineering signals locally; full transcripts, source contents, and secrets are
+not captured by default. See the [universal setup guide](./docs/UNIVERSAL_SETUP.md).
 
 ## Quick start
 
@@ -74,7 +91,7 @@ cortex handoff --task <taskId> --attempt <attemptId> \
 cortex resume <taskId>
 cortex detect <taskId>
 cortex verify --task <taskId> --attempt <attemptId> \
-  --summary "Migration tests pass" --source test
+  --summary "Migration tests pass" --source ci
 ```
 
 ### Connect an MCP client manually
@@ -90,7 +107,7 @@ cortex verify --task <taskId> --attempt <attemptId> \
 }
 ```
 
-Use the [universal setup guide](./docs/UNIVERSAL_SETUP.md) for Cursor, Windsurf, Claude, Gemini, Zed, and compatible MCP clients.
+Use the [universal setup guide](./docs/UNIVERSAL_SETUP.md) for Cursor, Windsurf, Claude, Gemini, Codex, OpenCode, Zed, and compatible MCP clients.
 
 ## Development
 
@@ -109,7 +126,7 @@ Useful documentation:
 - [CLI and editor installation](./docs/getting-started/installation.md)
 - [MCP and universal setup](./docs/UNIVERSAL_SETUP.md)
 - [Architecture and handoff contract](./docs/architecture/HANDOFF_CONTRACT.md)
-- [Roadmap](./ROADMAP.md)
+- [Roadmap](./docs/strategy/ROADMAP.md)
 - [Contributing](./CONTRIBUTING.md)
 - [Support](./.github/SUPPORT.md)
 - [Security policy](./SECURITY.md)

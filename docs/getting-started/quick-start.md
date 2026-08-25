@@ -62,7 +62,7 @@ cortex verify \
   --task <taskId> \
   --attempt <attemptId> \
   --summary "Migration tests pass" \
-  --source test
+  --source ci
 ```
 
 `detect` reports branch, commit, worktree, or remote drift before you trust a stale packet.

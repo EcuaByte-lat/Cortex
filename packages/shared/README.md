@@ -1,8 +1,34 @@
 # `@ecuabyte/cortex-shared`
 
-Shared types and utilities for Cortex engineering-state integrations.
+Shared contracts for Cortex integrations. This package keeps the CLI, core,
+MCP server, dashboard, extension, and provider adapters aligned around the same
+continuity vocabulary.
 
-The package contains the common contracts used by the CLI, MCP server, and editor adapters. For installation and end-user usage, start with the [root README](../../README.md).
+## Shared contracts
+
+- `AgentEvent` and lifecycle event types.
+- Tasks, attempts, evidence, handoffs, repository context, and verification.
+- Dashboard snapshots and command schemas.
+- Legacy memory types and constants for compatibility.
+
+The canonical product relationship is:
+
+```text
+task -> attempt -> evidence -> artifact -> verification -> handoff
+```
+
+This package contains types and pure utilities only. Persistence belongs in
+`@ecuabyte/cortex-core`; provider capture belongs in adapters.
+
+## Development
+
+```bash
+bun --cwd packages/shared test
+bun run typecheck
+```
+
+See the [handoff contract](../../docs/architecture/HANDOFF_CONTRACT.md) and
+[architecture docs](../../docs/architecture/README.md).
 
 ## License
 

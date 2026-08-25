@@ -107,7 +107,7 @@ cortex resume <taskId>
 cortex detect <taskId>
 cortex verify --task <taskId> --attempt <attemptId> \
   --summary "Migration tests pass" \
-  --source test
+  --source ci
 ```
 
 ## Troubleshooting

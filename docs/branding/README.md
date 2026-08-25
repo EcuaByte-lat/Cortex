@@ -1,6 +1,7 @@
 # Cortex Branding Assets
 
-Logo and icon assets for Cortex: evidence-backed engineering state and handoffs for coding agents.
+Logo and icon assets for Cortex: an open-source, evidence-backed continuity
+layer for coding agents.
 
 ## 📁 File Structure
 
@@ -92,7 +93,7 @@ Use `png/icon-512.png` as your npm package icon.
 
 The Cortex logo represents:
 - **Engineering graph**: Central hub with connected nodes symbolizing project state, evidence, and handoffs
-- **Persistent Memory**: The inner core represents stored knowledge that persists
+- **Durable Project State**: The inner core represents evidence and decisions that persist across agents
 - **Connectivity**: Radiating pathways show integration with multiple tools
 - **Modern Tech**: Purple gradient represents AI/ML industry aesthetics
 
@@ -102,4 +103,4 @@ MIT License - Free to use with attribution.
 
 ---
 
-**Created for [Cortex](https://github.com/EcuaByte-lat/Cortex)** - Evidence-backed engineering state for coding agents
+**Created for [Cortex](https://github.com/EcuaByte-lat/Cortex)** — Open-source evidence-backed engineering continuity for coding agents

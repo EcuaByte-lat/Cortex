@@ -1,7 +1,7 @@
 # Cortex Product Direction
 
 **Status:** Canonical working thesis
-**Updated:** 2026-08-14
+**Updated:** 2026-08-25
 **Decision:** Reposition Cortex from a generic AI memory layer to a verified engineering state plane.
 
 Distribution and retention are governed separately in [DISTRIBUTION.md](./DISTRIBUTION.md) and [ADOPTION.md](./ADOPTION.md). The local CLI/MCP lifecycle exists today; integrations, richer provenance, and measurable continuation outcomes remain active product work.
@@ -69,6 +69,21 @@ The first product must make this measurable:
 - CI and PR integrations attach verification evidence automatically.
 
 The initial handoff should be useful even when no cloud account exists and should be inspectable as human-readable JSON/Markdown.
+
+## Operating model
+
+Cortex has one canonical continuity record and several replaceable surfaces:
+
+| Surface | Responsibility |
+|---|---|
+| Agent hooks/plugins | Capture lifecycle events and inject small, relevant context where supported |
+| Git/CI/PR | Supply engineering evidence and verification |
+| CLI | Install, inspect, export, debug, and automate Cortex locally |
+| MCP | Let agents query and update task state |
+| VS Code extension | Make active state, freshness, blockers, and handoffs visible |
+| Optional cloud | Share task/evidence metadata across people, machines, and repositories |
+
+Hooks are fail-open telemetry and context surfaces. They must not block an agent or developer workflow unless a future, explicit governance policy opts into enforcement. Skills, rules, and routines distribute the workflow; they are not the source of truth. See the implementation order in [ROADMAP.md](./ROADMAP.md).
 
 ## Target users and buying trigger
 

@@ -16,14 +16,21 @@ cortex install --project .
 
 The installer preserves existing configuration and adds:
 
-- Codex lifecycle hooks in `.codex/hooks.json`;
+- Codex MCP registration when the `codex` CLI is available, plus project instructions in `AGENTS.md`;
+- Claude Code lifecycle hooks in `.claude/settings.json` using the provider's JSON hook contract;
 - an OpenCode plugin in `.opencode/plugins/cortex.ts`; and
+- fail-open Git hooks in `.cortex/hooks/` for commit, checkout, merge, and push evidence;
 - the existing MCP/rules configuration for the supported editors.
 
 The integrations call `cortex bridge ingest`, which writes to the local
 ContinuityStore. Events are deduplicated by provider/session/event identity and
 redacted before storage. The bridge records durable engineering signals rather
 than full prompts, transcripts, or file contents.
+
+`cortex setup` is the recommended one-command path. It configures the project
+and runs the existing scan. `cortex install --project .` configures the same
+project surfaces without scanning. Capture is fail-open: if Cortex is not
+installed or unavailable, the agent, Git commit, and Git push continue normally.
 
 To use the bridge with another runtime adapter, provide one JSON event on
 stdin:

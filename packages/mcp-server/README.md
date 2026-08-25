@@ -1,21 +1,51 @@
-# Cortex MCP Server
+# `@ecuabyte/cortex-mcp-server`
 
-The Model Context Protocol bridge for evidence-backed engineering state and coding-agent handoffs.
+The Model Context Protocol server for Cortex. It gives compatible agents a
+provider-neutral way to start/resume tasks, capture evidence, create handoffs,
+detect repository drift, and record verification.
 
-## 📚 Central Documentation
+## Quick start
 
-For MCP tool descriptions, installation guides, and editor configuration, please visit:
+```bash
+bunx @ecuabyte/cortex-mcp-server
+```
 
-👉 **[cortex.ecuabyte.lat/docs/mcp](https://cortex.ecuabyte.lat/docs/mcp/)**
+For a generated client configuration:
 
----
-
-### Quick Start
 ```bash
 bunx @ecuabyte/cortex-mcp-server generate-config --target claude
 ```
 
-The server requires Bun 1.x. See the [universal setup guide](../../docs/UNIVERSAL_SETUP.md) for client configuration and the [capability matrix](../../docs/SUPPORTED_TOOLS.md) for current support levels.
+The server requires Bun 1.x and uses the local ContinuityStore by default. MCP
+is the query/action surface; lifecycle capture comes from hooks, plugins, Git,
+and CI adapters.
+
+## Continuity tools
+
+- `cortex_start`
+- `cortex_status`
+- `cortex_capture`
+- `cortex_handoff`
+- `cortex_resume`
+- `cortex_detect`
+- `cortex_verify`
+
+Agents should treat summaries as unverified until supported by Git, tests, CI,
+tools, files, or human approval.
+
+## Documentation
+
+- [Universal setup](../../docs/UNIVERSAL_SETUP.md)
+- [Supported tools](../../docs/SUPPORTED_TOOLS.md)
+- [Handoff contract](../../docs/architecture/HANDOFF_CONTRACT.md)
+- [Roadmap](../../docs/strategy/ROADMAP.md)
+
+## Development
+
+```bash
+bun --cwd packages/mcp-server test
+bun run build:mcp
+```
 
 ## License
 MIT
