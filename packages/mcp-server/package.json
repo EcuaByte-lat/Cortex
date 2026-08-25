@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-mcp-server",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "mcpName": "io.github.EcuaByte-lat/cortex",
   "description": "MCP server exposing Cortex engineering state and handoffs to coding agents",
   "type": "module",

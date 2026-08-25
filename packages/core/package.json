@@ -1,6 +1,6 @@
 {
   "name": "@ecuabyte/cortex-core",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Local-first engineering state store and continuity primitives for Cortex",
   "type": "module",
   "main": "./dist/index.js",
