@@ -3,7 +3,8 @@
 # Dependencies
 node_modules/
 bun.lockb
-bun.lock
+# Keep bun.lock tracked: CI uses --frozen-lockfile and Dependabot needs a
+# reproducible dependency graph for security updates.
 
 # Build outputs
 **/dist/

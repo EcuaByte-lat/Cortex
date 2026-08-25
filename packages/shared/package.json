@@ -21,7 +21,7 @@
     "build": "bunx tsc --declaration --emitDeclarationOnly --outDir dist"
   },
   "dependencies": {
-    "zod": "^4.0.0"
+    "zod": "^4.4.3"
   },
   "repository": {
     "type": "git",

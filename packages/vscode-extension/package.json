@@ -62,18 +62,18 @@
     "icon.png"
   ],
   "devDependencies": {
-    "@types/sql.js": "^1.4.9",
-    "@types/vscode": "^1.104.0",
-    "@vscode/vsce": "^3.7.1",
+    "@types/sql.js": "^1.4.11",
+    "@types/vscode": "^1.134.0",
+    "@vscode/vsce": "^3.9.2",
     "@ecuabyte/cortex-shared": "workspace:^"
   },
   "dependencies": {
     "@ecuabyte/cortex-dashboard": "workspace:^",
-    "@google/generative-ai": "^0.24.0",
-    "sql.js": "^1.13.0",
+    "@google/generative-ai": "^0.24.1",
+    "sql.js": "^1.14.2",
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "contributes": {
     "taskDefinitions": [
