@@ -18,7 +18,8 @@
  * @see https://github.com/changesets/changesets/discussions/1389
  */
 
-import { join } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { $ } from 'bun';
 
 const PACKAGES_DIR = join(import.meta.dir, '..', 'packages');
@@ -37,6 +38,12 @@ interface PublishResult {
   package: string;
   success: boolean;
   message: string;
+}
+
+interface ChangesetsOutputEvent {
+  type: 'git-tag';
+  tag: string;
+  packageName: string;
 }
 
 // Get all package info
@@ -112,6 +119,43 @@ async function resolveWorkspaceDeps(
 async function restorePackageJson(pkgPath: string, original: string): Promise<void> {
   const pkgJsonPath = join(pkgPath, 'package.json');
   await Bun.write(pkgJsonPath, original);
+}
+
+function getPublishedPackages(
+  published: PublishResult[],
+  allPackages: Map<string, PackageInfo>
+): PackageInfo[] {
+  return published
+    .map((result) => allPackages.get(result.package))
+    .filter((pkg): pkg is PackageInfo => pkg !== undefined);
+}
+
+/**
+ * Changesets action expects the same NDJSON events emitted by `changeset
+ * publish`. This script owns npm publishing because it must resolve Bun's
+ * workspace: protocol first, so it writes the compatible report directly.
+ */
+async function writeChangesetsOutput(
+  published: PublishResult[],
+  allPackages: Map<string, PackageInfo>
+): Promise<void> {
+  const outputPath = process.env.CHANGESETS_OUTPUT;
+  if (!outputPath) return;
+
+  const events: ChangesetsOutputEvent[] = getPublishedPackages(published, allPackages).map(
+    (pkg) => ({
+      type: 'git-tag',
+      tag: `${pkg.name}@${pkg.version}`,
+      packageName: pkg.name,
+    })
+  );
+
+  await mkdir(dirname(outputPath), { recursive: true });
+  await Bun.write(
+    outputPath,
+    events.length > 0 ? `${events.map((event) => JSON.stringify(event)).join('\n')}\n` : ''
+  );
+  console.log(`📝 Changesets output written to ${outputPath}`);
 }
 
 async function isVersionPublished(name: string, version: string): Promise<boolean> {
@@ -222,8 +266,9 @@ async function main() {
     `Published: ${published.length}, Skipped: ${skipped.length}, Failed: ${failed.length}`
   );
 
-  // Create git tags for published packages
-  if (published.length > 0) {
+  // When running through changesets/action, the action owns tag creation and
+  // GitHub releases. Keep the local fallback for manual publish invocations.
+  if (published.length > 0 && !process.env.CHANGESETS_OUTPUT) {
     console.log('\n🏷️  Creating git tags...');
     for (const r of published) {
       const pkgInfo = Array.from(allPackages.values()).find((p) => p.name === r.package);
@@ -246,15 +291,12 @@ async function main() {
     }
   }
 
+  await writeChangesetsOutput(published, allPackages);
+
   // Output for GitHub Actions
   if (process.env.GITHUB_OUTPUT) {
     const publishedPackages = JSON.stringify(
-      published
-        .map((r) => {
-          const pkgInfo = Array.from(allPackages.values()).find((p) => p.name === r.package);
-          return pkgInfo ? { name: pkgInfo.name, version: pkgInfo.version } : null;
-        })
-        .filter(Boolean)
+      getPublishedPackages(published, allPackages).map(({ name, version }) => ({ name, version }))
     );
 
     await Bun.write(
