@@ -184,9 +184,9 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
           # Use custom publish script that properly resolves workspace: protocol
           # See: https://github.com/oven-sh/bun/issues/24687
-          publish: bun run scripts/publish.ts
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
+          publish-script: bun run scripts/publish.ts
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
 
