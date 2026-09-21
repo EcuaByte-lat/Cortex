@@ -64,7 +64,7 @@
   "devDependencies": {
     "@types/sql.js": "^1.4.11",
     "@types/vscode": "^1.134.0",
-    "@vscode/vsce": "^3.9.2",
+    "@vscode/vsce": "^4.0.0",
     "@ecuabyte/cortex-shared": "workspace:^"
   },
   "dependencies": {
